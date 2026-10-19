@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Dashboard</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="meta-row">
+      <a href="/" class="tag" style="color:#9fb0c8">■ ← back to the guide</a>
+      <span class="badge" id="who">not signed in</span>
+    </div>
+    <h1>Your agent <span class="accent">dashboard.</span></h1>
+    <p class="sub">Create agents, feed them data, review what they propose, approve or reject.</p>
+  </div>
+</header>
+
+<main class="wrap" style="padding-bottom:40px">
+  <section class="sheet" id="auth-box" hidden>
+    <h2>Sign in</h2>
+    <p class="intro">Your agents, runs and checklists are saved to your account.</p>
+    <form class="tool" id="auth-form">
+      <input name="name" placeholder="Name (sign-up only)">
+      <input name="email" type="email" placeholder="Email" required>
+      <input name="password" type="password" placeholder="Password (min 8 chars)" required>
+      <div style="display:flex;gap:8px"><button class="btn" data-mode="login">Log in</button><button class="btn ghost" data-mode="signup">Create account</button></div>
+      <p id="auth-err" style="color:#c2410c;margin:0"></p>
+    </form>
+  </section>
+
+  <div id="app" hidden style="display:grid;gap:20px">
+    <section class="sheet">
+      <h2>New agent</h2>
+      <p class="intro">Built-in agents analyse a CSV export. "Custom AI agent" uses Claude with your role and rules.</p>
+      <form class="tool" id="new-agent">
+        <select name="kind" id="kind"></select>
+        <input name="name" placeholder="Agent name" required>
+        <input name="role" placeholder="Role (one sentence)">
+        <textarea name="rules" placeholder="Rules and limits"></textarea>
+        <select name="cadence"><option>Daily</option><option selected>Weekly</option><option>Monthly</option></select>
+        <button class="btn">Create agent</button>
+      </form>
+    </section>
+
+    <section class="sheet">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <h2>Your agents</h2><button class="btn ghost" id="logout">Log out</button>
+      </div>
+      <div id="agents"></div>
+    </section>
+
+    <section class="sheet" id="runner" hidden>
+      <h2 id="run-title"></h2>
+      <p class="intro" id="run-cols"></p>
+      <div class="tool">
+        <input type="file" id="csv-file" accept=".csv,text/csv,text/plain">
+        <textarea id="csv" rows="8" placeholder="…or paste CSV here"></textarea>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="run-btn">Run agent</button><button class="btn ghost" id="sample-btn">Load sample data</button></div>
+      </div>
+      <div id="run-out" style="margin-top:12px"></div>
+      <h3 style="margin-top:20px">Run history</h3>
+      <div id="history"></div>
+    </section>
+  </div>
+</main>
+<script src="dashboard.js"></script>
+</body>
+</html>

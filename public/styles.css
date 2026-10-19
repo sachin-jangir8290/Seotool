@@ -98,3 +98,4 @@ label.chk input { accent-color: var(--accent); margin-top: 2px; }
   #sheets { display: block; }
   .sheet { break-inside: avoid; border: 1px solid #ccc; margin-bottom: 12px; }
 }
+[hidden] { display: none !important; }

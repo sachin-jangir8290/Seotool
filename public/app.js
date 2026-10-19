@@ -29,6 +29,7 @@ function bindChecklist(id, total, verdict) {
     const state = {};
     root.querySelectorAll("input").forEach((i) => { if (i.checked) state[i.dataset.k] = 1; });
     store.set("chk-" + id, state);
+    if (loggedIn) fetch("/api/progress/" + id, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(state) });
     const done = Object.keys(state).length;
     $("#score-" + id).innerHTML = `<b>${done}</b> / ${total} done — ${verdict(done, total)}<div class="bar"><i style="width:${(done / total) * 100}%"></i></div>`;
   };
@@ -133,4 +134,16 @@ function render() {
   $("#pb-copy").addEventListener("click", () => navigator.clipboard?.writeText($("#pb-out").textContent));
 }
 
-render();
+// When served by the backend and signed in, checklist progress syncs to the account.
+let loggedIn = false;
+(async () => {
+  try {
+    const me = await (await fetch("/api/me")).json();
+    if (me.user) {
+      loggedIn = true;
+      const saved = await (await fetch("/api/progress")).json();
+      Object.entries(saved).forEach(([k, v]) => store.set("chk-" + k, v));
+    }
+  } catch {}
+  render();
+})();

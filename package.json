@@ -1,0 +1,28 @@
+{
+  "name": "seotool",
+  "version": "1.0.0",
+  "description": "Static website: open `index.html` in a browser (no build). Content lives in `data.js`.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sachin-jangir8290/Seotool.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sachin-jangir8290/Seotool/issues"
+  },
+  "homepage": "https://github.com/sachin-jangir8290/Seotool#readme",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
+    "express": "^4.22.3"
+  },
+  "engines": {
+    "node": ">=22.5"
+  }
+}
