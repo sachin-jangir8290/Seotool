@@ -13,6 +13,7 @@ Run **Google Ads, Meta Ads, SEO and AI search (GEO)** with a team of AI agents �
   - competitor pages worth copying (*Steal / Skip*)
   - ad teardown: hook, format, offer, awareness, driver, CTA, claim risk → patterns that survive → briefs
 - **AI citation tracking** — asks Claude, ChatGPT, Gemini and Perplexity your buyer questions; shows citation rate, position, sentiment, whether your site is cited, and who gets named instead (each engine runs only when its API key is set)
+- **✎ Page rewriter** — turns Blitz "Change" verdicts into drafts (title, meta, H1, answer-first intro, FAQ, FAQ/Article schema, canonical) with Claude or free rules mode; edit, approve or reject each one and copy the approved HTML
 - **Schedules & alerts** — run SEO audits, AI visibility, Blitz and AI-citation tracking hourly/daily/weekly/monthly; get an alert in the dashboard, on Slack/Discord (webhook) or by email when a score moves past your threshold
 - **SEO audit** — 14 on-page checks with a 0–100 score
 - **AI visibility (GEO)** — AI crawler access (GPTBot, ClaudeBot, PerplexityBot…), llms.txt, schema, answer-friendly content
@@ -66,7 +67,7 @@ Add a new agent by dropping one file into `plugins/` — see [CONTRIBUTING.md](C
 - [x] Real AI citation tracking (ask ChatGPT, Claude, Gemini, Perplexity)
 - [ ] Live connections: Search Console, Google Ads, Meta Ads, GA4
 - [x] Scheduled runs with email / Slack alerts
-- [ ] One-click AI rewrites for Blitz "Change" verdicts
+- [x] One-click AI rewrites for Blitz "Change" verdicts
 - [ ] Keyword research and rank tracking
 - [ ] Multi-client agency mode and white-label reports
 - [ ] UI translations (Hindi first)

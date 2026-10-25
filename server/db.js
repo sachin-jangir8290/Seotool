@@ -30,6 +30,10 @@ db.exec(`
     id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     brand TEXT NOT NULL, config TEXT NOT NULL, summary TEXT, rows TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP);
+  CREATE TABLE IF NOT EXISTS rewrites (
+    id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    url TEXT NOT NULL, mode TEXT NOT NULL, items TEXT NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP);
 `);
 
 module.exports = db;

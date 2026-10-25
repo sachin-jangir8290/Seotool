@@ -37,7 +37,7 @@
   <div id="app" hidden>
     <nav class="tabs" id="tabs">
       <button data-tab="overview" class="on">Overview</button><button data-tab="agents">Agents</button>
-      <button data-tab="seo">SEO audit</button><button data-tab="geo">AI visibility</button><button data-tab="blitz">⚡ Blitz</button><button data-tab="cite">AI Citations</button><button data-tab="sched">Schedules <span class="badge-n" id="alert-n" hidden></span></button><button data-tab="chat">Assistant</button>
+      <button data-tab="seo">SEO audit</button><button data-tab="geo">AI visibility</button><button data-tab="blitz">⚡ Blitz</button><button data-tab="cite">AI Citations</button><button data-tab="rewrite">✎ Rewriter</button><button data-tab="sched">Schedules <span class="badge-n" id="alert-n" hidden></span></button><button data-tab="chat">Assistant</button>
     </nav>
 
     <div class="tab" data-pane="overview">
@@ -98,6 +98,20 @@
       <div class="live" id="cite-stats" hidden></div>
       <div class="engine-grid" id="cite-out"></div>
       <section class="sheet"><h2>Past runs</h2><div id="cite-history"></div></section>
+    </div>
+
+    <div class="tab" data-pane="rewrite" hidden>
+      <section class="sheet">
+        <h2>✎ Page rewriter</h2>
+        <p class="intro">Turns every "Change" verdict into a ready-to-paste draft: title, meta, H1, answer-first intro, FAQ and schema. Review each one — edit, approve or reject — then copy the approved HTML.</p>
+        <form class="tool inline" id="rw-form">
+          <input name="url" placeholder="https://yourwebsite.com/page" required>
+          <button class="btn">Rewrite</button>
+        </form>
+        <div class="seg" id="rw-mode" style="margin-top:12px"><button type="button" data-m="ai" class="on">AI (Claude)</button><button type="button" data-m="rules">Rules (free, no key)</button></div>
+      </section>
+      <div id="rw-out"></div>
+      <section class="sheet"><h2>Past rewrites</h2><div id="rw-history"></div></section>
     </div>
 
     <div class="tab" data-pane="sched" hidden>
@@ -172,5 +186,6 @@
 <script src="blitz.js"></script>
 <script src="citations.js"></script>
 <script src="schedules.js"></script>
+<script src="rewrite.js"></script>
 </body>
 </html>

@@ -9,6 +9,7 @@ const blitz = require("./blitz");
 const engines = require("./engines");
 const citations = require("./citations");
 const scheduler = require("./scheduler");
+const rewriter = require("./rewriter");
 
 const app = express();
 app.use(express.json({ limit: "5mb" }));
@@ -286,6 +287,43 @@ app.get("/api/citations/runs/:id", auth, wrap((req, res) => {
   if (!r) throw new Error("Run not found");
   res.json({ ...r, config: JSON.parse(r.config), summary: JSON.parse(r.summary || "[]"), rows: JSON.parse(r.rows || "[]") });
 }));
+
+// ---- page rewriter: drafts for Blitz "Change" verdicts, approved item by item ----
+const ownRewrite = (req) => {
+  const r = db.prepare("SELECT * FROM rewrites WHERE id = ? AND user_id = ?").get(req.params.id, req.user.id);
+  if (!r) throw new Error("Rewrite not found");
+  return { ...r, items: JSON.parse(r.items) };
+};
+
+app.post("/api/rewrites", auth, wrap(async (req, res) => {
+  const mode = req.body?.mode === "ai" ? "ai" : "rules";
+  if (mode === "ai" && !ai.enabled()) throw new Error("AI mode needs ANTHROPIC_API_KEY on the server — use Rules mode instead");
+  const out = await rewriter.rewritePage(String(req.body?.url || ""), { mode });
+  const { lastInsertRowid } = db.prepare("INSERT INTO rewrites (user_id, url, mode, items) VALUES (?, ?, ?, ?)").run(req.user.id, out.url, mode, JSON.stringify(out.items));
+  res.json({ id: Number(lastInsertRowid), ...out });
+}));
+
+app.get("/api/rewrites", auth, (req, res) => {
+  const rows = db.prepare("SELECT id, url, mode, items, created_at FROM rewrites WHERE user_id = ? ORDER BY id DESC LIMIT 30").all(req.user.id);
+  res.json(rows.map(({ items, ...r }) => {
+    const list = JSON.parse(items);
+    return { ...r, total: list.length, approved: list.filter((i) => i.status === "approved").length };
+  }));
+});
+
+app.get("/api/rewrites/:id", auth, wrap((req, res) => res.json(ownRewrite(req))));
+
+app.patch("/api/rewrites/:id/items/:item", auth, wrap((req, res) => {
+  const r = ownRewrite(req);
+  const it = r.items.find((i) => i.id === Number(req.params.item));
+  if (!it) throw new Error("Item not found");
+  if (["approved", "rejected", "pending"].includes(req.body?.status)) it.status = req.body.status;
+  if (typeof req.body?.after === "string") it.after = req.body.after.slice(0, 20000);
+  db.prepare("UPDATE rewrites SET items = ? WHERE id = ?").run(JSON.stringify(r.items), r.id);
+  res.json(it);
+}));
+
+app.get("/api/rewrites/:id/export", auth, wrap((req, res) => res.type("text/plain").send(rewriter.exportHtml(ownRewrite(req).items))));
 
 // ---- schedules & alerts ----
 const ownSchedule = (req) => {

@@ -99,7 +99,8 @@ function handle(m, s) {
     const r = m.row, f = r.factors;
     s.cites.push(r.chance);
     big("p4", Math.round(s.cites.filter((c) => c >= 50).length / s.cites.length * 100) + "%", "likely cited now");
-    addRows("p4", `<tr class="new"><td>${esc(r.page)}</td><td>${meter(r.chance / 80)} ${r.chance}%</td><td class="dots">${dots(f.answer)}</td><td class="dots">${dots(f.facts)}</td>
+    const full = new URL(r.page, $("#blitz-site").url.value).href;
+    addRows("p4", `<tr class="new"><td>${esc(r.page)}<br><a href="#" onclick="openRewrite('${esc(full).replace(/'/g, "%27")}');return false">✎ Rewrite</a></td><td>${meter(r.chance / 80)} ${r.chance}%</td><td class="dots">${dots(f.answer)}</td><td class="dots">${dots(f.facts)}</td>
       <td class="dots">${dots(f.schema)}</td><td class="dots">${dots(f.fresh)}</td><td>${esc(r.fixFirst)}</td><td><b>${r.after}%</b></td></tr>`);
   }
   if (m.type === "coverage") {

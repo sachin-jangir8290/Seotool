@@ -272,3 +272,15 @@ label.chk input { accent-color: var(--p1); margin-top: 4px; }
 .alert i { font-style: normal; width: 24px; height: 24px; flex: none; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 12px; }
 .alert i.drop, .alert i.error { background: #d93a3a; } .alert i.rise { background: #16a36a; }
 .switch { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; }
+
+/* rewriter */
+.rw-item { border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 12px; background: #fff; border-left: 4px solid var(--line); }
+.rw-item.approved { border-left-color: #16a36a; } .rw-item.rejected { border-left-color: #d93a3a; opacity: .6; }
+.rw-item header { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rw-item h3 { margin: 0; font-size: 15px; } .rw-item .why { color: var(--muted); font-size: 12px; margin: 4px 0 8px; }
+.rw-before { font-size: 13px; color: var(--muted); text-decoration: line-through; margin-bottom: 6px; white-space: pre-wrap; word-break: break-word; }
+.rw-item textarea { width: 100%; font: 13px/1.5 inherit; font-family: inherit; padding: 10px; border: 1px solid var(--line); border-radius: 8px; resize: vertical; }
+.rw-item textarea.code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+.rw-item .len { font-size: 11px; color: var(--muted); }
+.rw-actions { display: flex; gap: 8px; }
+.rw-export { white-space: pre-wrap; max-height: 360px; overflow: auto; }
