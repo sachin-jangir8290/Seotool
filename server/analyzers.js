@@ -89,6 +89,46 @@ const ANALYZERS = {
   },
 };
 
+// GA4-powered agents (also work with any CSV in the same shape).
+const pct = (now, before) => (before ? Math.round(((now - before) / before) * 100) : now ? 100 : 0);
+Object.assign(ANALYZERS, {
+  "landing-pages": {
+    label: "GA4 landing page agent",
+    columns: "page, sessions_current, sessions_previous, key_events, engagement_rate",
+    sample: "page,sessions_current,sessions_previous,key_events,engagement_rate\n/pricing,820,1100,4,38\n/blog/guide,2400,2300,0,71\n/,5000,4900,120,64\n/features,90,300,2,30",
+    run(rows, opts = {}) {
+      need(rows, ["page", "sessions_current", "sessions_previous"]);
+      const min = num(opts.minSessions) || 50;
+      const out = rows.map((r) => {
+        const now = num(r.sessions_current), before = num(r.sessions_previous), ev = num(r.key_events), eng = num(r.engagement_rate);
+        const change = pct(now, before);
+        const issues = [];
+        if (before >= min && change <= -20) issues.push(`traffic ${change}%`);
+        if (now >= min * 4 && ev === 0) issues.push("traffic but no key events");
+        if (now >= min && eng && eng < 40) issues.push(`low engagement ${eng}%`);
+        const action = issues.includes("traffic but no key events") ? "Add a clear CTA / offer to this page"
+          : change <= -20 ? "Check rankings & AI citations for this page; refresh content" : "Rewrite the intro so it answers the visit intent";
+        return { page: r.page, sessions: now, change: `${change}%`, key_events: ev, engagement: eng ? `${eng}%` : "—", issues: issues.join(", "), action, _n: issues.length, _now: now };
+      }).filter((r) => r._n).sort((a, b) => b._n - a._n || b._now - a._now).slice(0, 25).map(({ _n, _now, ...r }) => r);
+      return { summary: `${out.length} landing pages need attention.`, columns: ["page", "sessions", "change", "key_events", "engagement", "issues", "action"], rows: out };
+    },
+  },
+  "ai-referrals": {
+    label: "GA4 AI referral tracker",
+    columns: "source, sessions_current, sessions_previous, key_events",
+    sample: "source,sessions_current,sessions_previous,key_events,engagement_rate\nchatgpt.com,340,210,9,66\nperplexity.ai,85,90,3,72\ngemini.google.com,40,12,0,58\nclaude.ai,22,0,1,80",
+    run(rows) {
+      need(rows, ["source", "sessions_current", "sessions_previous"]);
+      const out = rows.map((r) => {
+        const now = num(r.sessions_current), before = num(r.sessions_previous), ev = num(r.key_events);
+        return { source: r.source, sessions: now, previous: before, change: `${pct(now, before) > 0 ? "+" : ""}${pct(now, before)}%`, key_events: ev, conv_rate: now ? `${((ev / now) * 100).toFixed(1)}%` : "—" };
+      }).sort((a, b) => b.sessions - a.sessions);
+      const total = out.reduce((s, r) => s + r.sessions, 0), prev = out.reduce((s, r) => s + r.previous, 0), ev = out.reduce((s, r) => s + r.key_events, 0);
+      return { summary: `${total} visits from AI assistants (${pct(total, prev) >= 0 ? "+" : ""}${pct(total, prev)}% vs previous period), ${ev} key events.`, columns: ["source", "sessions", "previous", "change", "key_events", "conv_rate"], rows: out };
+    },
+  },
+});
+
 // Plugins: every .js file in /plugins (or PLUGINS_DIR) can add analyzers.
 // A plugin exports { analyzers: { "kind": { label, columns, sample, run(rows, opts) } } }.
 function loadPlugins(dir = process.env.PLUGINS_DIR || require("path").join(__dirname, "..", "plugins")) {

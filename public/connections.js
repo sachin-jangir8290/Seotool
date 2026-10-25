@@ -1,8 +1,12 @@
 // Connections (Google Search Console) on Overview + import into agents. Uses $, esc, api from dashboard.js.
-const GSC_KINDS = { "click-loss": "click-loss", cannibalization: "cannibalization" };
-let gscStatus = null, gscSites = null;
+// Which live source feeds each agent kind.
+const IMPORTS = {
+  "click-loss": { source: "gsc", kind: "click-loss" }, cannibalization: { source: "gsc", kind: "cannibalization" },
+  "landing-pages": { source: "ga4", kind: "landing-pages" }, "ai-referrals": { source: "ga4", kind: "ai-referrals" },
+};
+let gscStatus = null, gscSites = null, ga4Props = null;
 
-const SOON = [["Google Ads", "#fbbc04", "Needs a Google Ads developer token"], ["Meta Ads", "#1877f2", "Needs a Meta app with ads_read"], ["GA4", "#e37400", "Coming next"]];
+const SOON = [["Google Ads", "#fbbc04", "Needs a Google Ads developer token"], ["Meta Ads", "#1877f2", "Needs a Meta app with ads_read"]];
 
 async function loadConnections() {
   gscStatus = await api("/api/google/status");
@@ -12,10 +16,13 @@ async function loadConnections() {
     : g.connected ? `<button class="btn ghost" id="gsc-disconnect">Disconnect</button>` : `<a class="btn" href="/api/google/connect">Connect Google</a>`;
   $("#conn-list").innerHTML = `<div class="conn"><div class="logo-g" style="background:#4285f4">G</div>
       <div class="info"><b>Google Search Console</b><small>${g.connected ? `Connected as ${esc(g.account || "your Google account")} · read-only` : "Clicks, impressions and positions for your pages and queries"}</small>${g.configured ? "" : action}</div>
-      ${g.configured ? action : ""}</div>` +
+      ${g.configured ? action : ""}</div>
+    <div class="conn"><div class="logo-g" style="background:#e37400">A</div>
+      <div class="info"><b>Google Analytics 4</b><small>${g.connected && g.ga4 ? "Connected · landing pages and AI-assistant referrals" : g.connected ? "Your Google connection predates GA4 access — disconnect and connect again to add it" : "Uses the same Google connection"}</small></div>
+      ${g.connected && g.ga4 ? '<span class="badge">Connected</span>' : ""}</div>` +
     SOON.map(([n, c, why]) => `<div class="conn"><div class="logo-g" style="background:${c}">${n[0]}</div><div class="info"><b>${n}</b><small>${why}</small></div><span class="badge">Coming soon</span></div>`).join("");
   const d = $("#gsc-disconnect");
-  if (d) d.onclick = async () => { if (confirm("Disconnect Google?")) { await api("/api/google", { method: "DELETE" }); gscSites = null; loadConnections(); } };
+  if (d) d.onclick = async () => { if (confirm("Disconnect Google?")) { await api("/api/google", { method: "DELETE" }); gscSites = ga4Props = null; loadConnections(); } };
 }
 
 // Show the connect result once after returning from Google.
@@ -32,21 +39,27 @@ openAgent = async (a) => {
   baseOpenAgent(a);
   const box = $("#gsc-import");
   box.hidden = true;
-  if (!GSC_KINDS[a.kind] || !gscStatus?.connected) return;
+  const imp = IMPORTS[a.kind];
+  if (!imp || !gscStatus?.connected || (imp.source === "ga4" && !gscStatus.ga4)) return;
   try {
-    gscSites ??= await api("/api/google/sites");
-    if (!gscSites.length) return;
-    $("#gsc-site").innerHTML = gscSites.map((s) => `<option>${esc(s)}</option>`).join("");
+    let opts;
+    if (imp.source === "gsc") opts = (gscSites ??= await api("/api/google/sites")).map((s) => [s, s]);
+    else opts = (ga4Props ??= await api("/api/google/ga4/properties")).map((p) => [p.id, p.name]);
+    if (!opts.length) return;
+    $("#gsc-site").innerHTML = opts.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join("");
+    $("#gsc-btn").textContent = imp.source === "gsc" ? "Import from Search Console" : "Import from GA4";
     box.hidden = false;
   } catch {}
 };
 $("#gsc-btn").onclick = async () => {
   const btn = $("#gsc-btn"); btn.disabled = true; btn.textContent = "Importing…";
+  const imp = IMPORTS[current.kind];
   try {
-    const r = await api(`/api/google/report?site=${encodeURIComponent($("#gsc-site").value)}&kind=${GSC_KINDS[current.kind]}`);
+    const v = encodeURIComponent($("#gsc-site").value);
+    const r = await api(imp.source === "gsc" ? `/api/google/report?site=${v}&kind=${imp.kind}` : `/api/google/ga4/report?property=${v}&kind=${imp.kind}`);
     $("#csv").value = r.csv;
     btn.textContent = `Imported ${r.rows} rows (${r.period})`;
-  } catch (e) { btn.textContent = "Import from Search Console"; alert(e.message); }
+  } catch (e) { btn.textContent = "Import"; alert(e.message); }
   finally { btn.disabled = false; }
 };
 

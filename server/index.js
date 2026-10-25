@@ -292,7 +292,7 @@ app.get("/api/citations/runs/:id", auth, wrap((req, res) => {
 // ---- Google connection (Search Console) ----
 app.get("/api/google/status", auth, (req, res) => {
   const c = google.configured() ? google.connection(req.user.id) : null;
-  res.json({ configured: google.configured(), connected: Boolean(c), account: c?.account || null, redirectUri: google.redirectUri() });
+  res.json({ configured: google.configured(), connected: Boolean(c), ga4: Boolean(c?.ga4), account: c?.account || null, redirectUri: google.redirectUri() });
 });
 
 app.get("/api/google/connect", auth, (req, res) => {
@@ -312,6 +312,11 @@ app.get("/api/google/callback", auth, async (req, res) => {
 
 app.delete("/api/google", auth, wrap(async (req, res) => { await google.disconnect(req.user.id); res.json({ ok: true }); }));
 app.get("/api/google/sites", auth, wrap(async (req, res) => res.json(await google.sites(req.user.id))));
+app.get("/api/google/ga4/properties", auth, wrap(async (req, res) => res.json(await google.ga4Properties(req.user.id))));
+app.get("/api/google/ga4/report", auth, wrap(async (req, res) => {
+  const days = Math.min(Math.max(Number(req.query.days) || 28, 7), 90);
+  res.json(await google.ga4Report(req.user.id, String(req.query.property || ""), String(req.query.kind || ""), days));
+}));
 app.get("/api/google/report", auth, wrap(async (req, res) => {
   const days = Math.min(Math.max(Number(req.query.days) || 28, 7), 90);
   res.json(await google.report(req.user.id, String(req.query.site || ""), String(req.query.kind || ""), days));

@@ -17,7 +17,8 @@ const fake = http.createServer((req, res) => {
       if (p.get("client_secret") !== "csecret") { res.statusCode = 401; return res.end("{}"); }
       if (p.get("grant_type") === "authorization_code") {
         const idToken = "x." + Buffer.from(JSON.stringify({ email: "owner@site.com" })).toString("base64url") + ".y";
-        return res.end(JSON.stringify({ access_token: "A1", refresh_token: "R1", expires_in: 30, id_token: idToken }));
+        return res.end(JSON.stringify({ access_token: "A1", refresh_token: "R1", expires_in: 30, id_token: idToken,
+          scope: "https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/analytics.readonly" }));
       }
       return res.end(JSON.stringify({ access_token: "A2", expires_in: 3600 }));
     }
@@ -28,12 +29,24 @@ const fake = http.createServer((req, res) => {
       if (q.dimensions.length === 2) return res.end(JSON.stringify({ rows: [{ keys: ["plant dye", "https://site.com/a"], clicks: 5, impressions: 50, position: 4.26 }] }));
       return res.end(JSON.stringify({ rows: recent ? [{ keys: ["https://site.com/a"], clicks: 10 }] : [{ keys: ["https://site.com/a"], clicks: 40 }, { keys: ["https://site.com/b"], clicks: 7 }] }));
     }
+    if (req.url.startsWith("/gaAdmin/accountSummaries")) return res.end(JSON.stringify({ accountSummaries: [{ displayName: "Acme", propertySummaries: [{ property: "properties/42", displayName: "acme.com" }] }] }));
+    if (req.url === "/gaData/properties/42:runReport") {
+      const q = JSON.parse(body);
+      const cur = q.dateRanges[0].endDate === "yesterday";
+      const m = (...v) => v.map((x) => ({ value: String(x) }));
+      if (q.dimensions[0].name === "sessionSource") {
+        return res.end(JSON.stringify({ rows: cur
+          ? [{ dimensionValues: [{ value: "chatgpt.com" }], metricValues: m(300, 6, 0.65) }, { dimensionValues: [{ value: "google" }], metricValues: m(9000, 80, 0.6) }, { dimensionValues: [{ value: "perplexity.ai" }], metricValues: m(50, 1, 0.7) }]
+          : [{ dimensionValues: [{ value: "chatgpt.com" }], metricValues: m(200) }] }));
+      }
+      return res.end(JSON.stringify({ rows: cur ? [{ dimensionValues: [{ value: "/pricing" }], metricValues: m(800, 0, 0.35) }] : [{ dimensionValues: [{ value: "/pricing" }], metricValues: m(1200) }] }));
+    }
     if (req.url.startsWith("/revoke")) return res.end("{}");
     res.statusCode = 404; res.end("{}");
   });
 }).listen(0);
 const F = `http://127.0.0.1:${fake.address().port}`;
-Object.assign(process.env, { GOOGLE_AUTH_URL: F + "/auth", GOOGLE_TOKEN_URL: F + "/token", GOOGLE_REVOKE_URL: F + "/revoke", GSC_API_URL: F + "/gsc" });
+Object.assign(process.env, { GOOGLE_AUTH_URL: F + "/auth", GOOGLE_TOKEN_URL: F + "/token", GOOGLE_REVOKE_URL: F + "/revoke", GSC_API_URL: F + "/gsc", GA_ADMIN_URL: F + "/gaAdmin", GA_DATA_URL: F + "/gaData" });
 
 test("connect Google, list sites, import click-loss, refresh token, disconnect", async () => {
   const app = require("../server/index.js");
@@ -82,6 +95,20 @@ test("connect Google, list sites, import click-loss, refresh token, disconnect",
     // The imported CSV runs straight through the click-loss agent.
     const { ANALYZERS, parseCSV } = require("../server/analyzers");
     assert.equal(ANALYZERS["click-loss"].run(parseCSV(rep.csv)).rows[0].page, "/a");
+
+    // GA4
+    assert.equal(st.ga4, true);
+    assert.deepEqual(await (await call("/api/google/ga4/properties")).json(), [{ id: "properties/42", name: "acme.com (Acme)" }]);
+    const ref = await (await call("/api/google/ga4/report?property=properties/42&kind=ai-referrals")).json();
+    assert.equal(ref.csv, "source,sessions_current,sessions_previous,key_events,engagement_rate\nchatgpt.com,300,200,6,65\nperplexity.ai,50,0,1,70", "only AI sources kept");
+    const refRun = ANALYZERS["ai-referrals"].run(parseCSV(ref.csv));
+    assert.match(refRun.summary, /350 visits from AI assistants \(\+75%/);
+    const lp = await (await call("/api/google/ga4/report?property=properties/42&kind=landing-pages")).json();
+    const lpRun = ANALYZERS["landing-pages"].run(parseCSV(lp.csv));
+    assert.match(lpRun.rows[0].issues, /traffic -33%/);
+    assert.match(lpRun.rows[0].issues, /no key events/);
+    const badProp = await call("/api/google/ga4/report?property=../../evil&kind=ai-referrals");
+    assert.equal(badProp.status, 400);
 
     await call("/api/google", { method: "DELETE" });
     assert.equal((await (await call("/api/google/status")).json()).connected, false);

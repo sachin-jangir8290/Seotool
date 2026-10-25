@@ -17,8 +17,11 @@ const URLS = {
   token: () => process.env.GOOGLE_TOKEN_URL || "https://oauth2.googleapis.com/token",
   revoke: () => process.env.GOOGLE_REVOKE_URL || "https://oauth2.googleapis.com/revoke",
   gsc: () => process.env.GSC_API_URL || "https://www.googleapis.com/webmasters/v3",
+  gaAdmin: () => process.env.GA_ADMIN_URL || "https://analyticsadmin.googleapis.com/v1beta",
+  gaData: () => process.env.GA_DATA_URL || "https://analyticsdata.googleapis.com/v1beta",
 };
-const SCOPES = ["https://www.googleapis.com/auth/webmasters.readonly", "openid", "email"];
+const GA_SCOPE = "https://www.googleapis.com/auth/analytics.readonly";
+const SCOPES = ["https://www.googleapis.com/auth/webmasters.readonly", GA_SCOPE, "openid", "email"];
 
 const configured = () => Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.SECRET_KEY);
 const redirectUri = () => `${(process.env.PUBLIC_URL || `http://localhost:${process.env.PORT || 3000}`).replace(/\/$/, "")}/api/google/callback`;
@@ -71,14 +74,16 @@ async function handleCallback({ code, state, userId }) {
   if (!row || row.expires_at < Date.now() || row.user_id !== userId) throw new Error("Login link expired or invalid — try connecting again");
   const t = await tokenRequest({ code, grant_type: "authorization_code", redirect_uri: redirectUri() });
   if (!t.refresh_token) throw new Error("Google did not return a refresh token — remove SEOTool from your Google account permissions and connect again");
-  const tokens = { access_token: t.access_token, refresh_token: t.refresh_token, expires_at: Date.now() + (t.expires_in - 60) * 1000 };
+  const tokens = { access_token: t.access_token, refresh_token: t.refresh_token, expires_at: Date.now() + (t.expires_in - 60) * 1000, scope: t.scope || "" };
   db.prepare(`INSERT INTO connections (user_id, provider, account, tokens) VALUES (?, 'google', ?, ?)
     ON CONFLICT(user_id, provider) DO UPDATE SET account = excluded.account, tokens = excluded.tokens`).run(userId, emailFromIdToken(t.id_token || ""), seal(tokens));
 }
 
 function connection(userId) {
   const row = db.prepare("SELECT account, tokens, created_at FROM connections WHERE user_id = ? AND provider = 'google'").get(userId);
-  return row ? { account: row.account, created_at: row.created_at, tokens: open(row.tokens) } : null;
+  if (!row) return null;
+  const tokens = open(row.tokens);
+  return { account: row.account, created_at: row.created_at, tokens, ga4: String(tokens.scope || "").includes(GA_SCOPE) };
 }
 
 async function accessToken(userId) {
@@ -142,4 +147,59 @@ async function report(userId, site, kind, days = 28) {
   throw new Error("Unknown report");
 }
 
-module.exports = { configured, redirectUri, authUrl, handleCallback, connection, accessToken, disconnect, sites, report, seal, open, URLS };
+// ---------- Google Analytics 4 ----------
+async function gapi(userId, url, body) {
+  const res = await fetch(url, {
+    method: body ? "POST" : "GET",
+    headers: { Authorization: `Bearer ${await accessToken(userId)}`, "Content-Type": "application/json" },
+    body: body && JSON.stringify(body), signal: AbortSignal.timeout(30000),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error?.message || `Google Analytics HTTP ${res.status}`);
+  return data;
+}
+
+async function ga4Properties(userId) {
+  if (!connection(userId)?.ga4) throw new Error("GA4 access not granted — disconnect and connect Google again");
+  const d = await gapi(userId, `${URLS.gaAdmin()}/accountSummaries?pageSize=200`);
+  return (d.accountSummaries || []).flatMap((a) => (a.propertySummaries || []).map((p) => ({ id: p.property, name: `${p.displayName} (${a.displayName})` })));
+}
+
+const AI_SOURCES = /chatgpt|openai|perplexity|claude\.ai|anthropic|gemini|bard|copilot|you\.com|phind|deepseek|meta\.ai/i;
+
+async function ga4Report(userId, property, kind, days = 28) {
+  if (!/^properties\/\d+$/.test(property)) throw new Error("Pick a GA4 property");
+  const run = (body) => gapi(userId, `${URLS.gaData()}/${property}:runReport`, { limit: 10000, ...body });
+  const cur = { startDate: `${days}daysAgo`, endDate: "yesterday" };
+  const prev = { startDate: `${2 * days}daysAgo`, endDate: `${days + 1}daysAgo` };
+  const val = (r, i) => Number(r.metricValues[i].value) || 0;
+  if (kind === "landing-pages") {
+    const metrics = [{ name: "sessions" }, { name: "keyEvents" }, { name: "engagementRate" }];
+    const [a, b] = await Promise.all([
+      run({ dateRanges: [cur], dimensions: [{ name: "landingPage" }], metrics }),
+      run({ dateRanges: [prev], dimensions: [{ name: "landingPage" }], metrics: [{ name: "sessions" }] }),
+    ]);
+    const before = new Map((b.rows || []).map((r) => [r.dimensionValues[0].value, val(r, 0)]));
+    const rows = (a.rows || []).map((r) => {
+      const page = r.dimensionValues[0].value;
+      return [page, val(r, 0), before.get(page) || 0, val(r, 1), Math.round(val(r, 2) * 100)];
+    });
+    return { csv: toCsv(["page", "sessions_current", "sessions_previous", "key_events", "engagement_rate"], rows), rows: rows.length, period: `last ${days} days vs the ${days} before` };
+  }
+  if (kind === "ai-referrals") {
+    const metrics = [{ name: "sessions" }, { name: "keyEvents" }, { name: "engagementRate" }];
+    const [a, b] = await Promise.all([
+      run({ dateRanges: [cur], dimensions: [{ name: "sessionSource" }], metrics }),
+      run({ dateRanges: [prev], dimensions: [{ name: "sessionSource" }], metrics: [{ name: "sessions" }] }),
+    ]);
+    const before = new Map((b.rows || []).map((r) => [r.dimensionValues[0].value, val(r, 0)]));
+    const rows = (a.rows || []).filter((r) => AI_SOURCES.test(r.dimensionValues[0].value)).map((r) => {
+      const src = r.dimensionValues[0].value;
+      return [src, val(r, 0), before.get(src) || 0, val(r, 1), Math.round(val(r, 2) * 100)];
+    });
+    return { csv: toCsv(["source", "sessions_current", "sessions_previous", "key_events", "engagement_rate"], rows), rows: rows.length, period: `last ${days} days vs the ${days} before` };
+  }
+  throw new Error("Unknown GA4 report");
+}
+
+module.exports = { ga4Properties, ga4Report, AI_SOURCES, configured, redirectUri, authUrl, handleCallback, connection, accessToken, disconnect, sites, report, seal, open, URLS };

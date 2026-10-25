@@ -13,7 +13,7 @@ Run **Google Ads, Meta Ads, SEO and AI search (GEO)** with a team of AI agents �
   - competitor pages worth copying (*Steal / Skip*)
   - ad teardown: hook, format, offer, awareness, driver, CTA, claim risk → patterns that survive → briefs
 - **AI citation tracking** — asks Claude, ChatGPT, Gemini and Perplexity your buyer questions; shows citation rate, position, sentiment, whether your site is cited, and who gets named instead (each engine runs only when its API key is set)
-- **Google Search Console connection** — OAuth, read-only, tokens encrypted at rest; import live page and query data straight into the click-loss and cannibalization agents
+- **Google connection (Search Console + GA4)** — OAuth, read-only, tokens encrypted at rest; import live data straight into agents: click-loss and cannibalization (Search Console), landing pages and **AI-assistant referrals** — visits and key events from ChatGPT, Perplexity, Claude, Gemini, Copilot (GA4)
 - **✎ Page rewriter** — turns Blitz "Change" verdicts into drafts (title, meta, H1, answer-first intro, FAQ, FAQ/Article schema, canonical) with Claude or free rules mode; edit, approve or reject each one and copy the approved HTML
 - **Schedules & alerts** — run SEO audits, AI visibility, Blitz and AI-citation tracking hourly/daily/weekly/monthly; get an alert in the dashboard, on Slack/Discord (webhook) or by email when a score moves past your threshold
 - **SEO audit** — 14 on-page checks with a 0–100 score
@@ -62,10 +62,10 @@ Copy `.env.example` to `.env` (or export the variables) to configure:
 | `PLUGINS_DIR` | Extra plugin folder (default `./plugins`) |
 | `AUDIT_ALLOW_PRIVATE=1` | Let audits reach localhost/private IPs (development only) |
 
-## Connect Google Search Console
+## Connect Google (Search Console + GA4)
 
-1. In [Google Cloud Console](https://console.cloud.google.com/) create a project and enable the **Google Search Console API**.
-2. *APIs & Services → OAuth consent screen*: choose **External**, add the scope `.../auth/webmasters.readonly`, and add yourself as a test user.
+1. In [Google Cloud Console](https://console.cloud.google.com/) create a project and enable the **Google Search Console API**, **Google Analytics Admin API** and **Google Analytics Data API**.
+2. *APIs & Services → OAuth consent screen*: choose **External**, add the scopes `.../auth/webmasters.readonly` and `.../auth/analytics.readonly`, and add yourself as a test user.
 3. *Credentials → Create credentials → OAuth client ID → Web application*. Add the redirect URI shown on the dashboard's Connections card: `PUBLIC_URL/api/google/callback`.
 4. Set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `SECRET_KEY` and `PUBLIC_URL`, restart, then click **Connect Google** on the Overview tab.
 
@@ -76,8 +76,8 @@ Add a new agent by dropping one file into `plugins/` — see [CONTRIBUTING.md](C
 ## Roadmap
 
 - [x] Real AI citation tracking (ask ChatGPT, Claude, Gemini, Perplexity)
-- [x] Live connection: Search Console
-- [ ] Live connections: Google Ads, Meta Ads, GA4
+- [x] Live connections: Search Console, GA4
+- [ ] Live connections: Google Ads, Meta Ads
 - [x] Scheduled runs with email / Slack alerts
 - [x] One-click AI rewrites for Blitz "Change" verdicts
 - [ ] Keyword research and rank tracking
