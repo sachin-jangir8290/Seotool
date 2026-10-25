@@ -26,5 +26,6 @@ Requires Node 22.5+ (uses the built-in `node:sqlite`; no database server needed)
 - `server/index.js` — Express API: auth, checklist progress, agents, runs, approvals
 - `server/analyzers.js` — built-in agents: click-loss, search-term miner, creative fatigue, budget pacing (CSV input)
 - `server/audit.js` — SEO site audit (14 checks) and AI-search/GEO visibility check (AI crawlers, llms.txt, schema)
+- `server/blitz.js` — Blitz: fast rules engine (no AI call per item) that crawls a site and judges every SEO element, scores AI-citation chance per page, matches buyer questions to pages, scores competitor pages to copy, and tears down ad copy into patterns + briefs
 - `server/ai.js` — Claude-powered custom agent and marketing assistant chat
 - `server/db.js` — SQLite schema

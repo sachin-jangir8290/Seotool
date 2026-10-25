@@ -116,4 +116,4 @@ async function geoAudit(raw) {
   return { url: page.finalUrl, score: scoreOf(checks), checks, bots };
 }
 
-module.exports = { seoAudit, geoAudit, isPrivate };
+module.exports = { seoAudit, geoAudit, isPrivate, get, checkUrl, strip, pick, meta };

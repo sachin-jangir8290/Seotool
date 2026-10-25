@@ -37,7 +37,7 @@
   <div id="app" hidden>
     <nav class="tabs" id="tabs">
       <button data-tab="overview" class="on">Overview</button><button data-tab="agents">Agents</button>
-      <button data-tab="seo">SEO audit</button><button data-tab="geo">AI visibility</button><button data-tab="chat">Assistant</button>
+      <button data-tab="seo">SEO audit</button><button data-tab="geo">AI visibility</button><button data-tab="blitz">⚡ Blitz</button><button data-tab="chat">Assistant</button>
     </nav>
 
     <div class="tab" data-pane="overview">
@@ -60,6 +60,26 @@
       <section class="sheet"><h2>AI search visibility (GEO)</h2><p class="intro">Checks AI crawler access in robots.txt, llms.txt, structured data and answer-friendly content.</p>
         <form class="tool inline" data-audit="geo"><input name="url" placeholder="https://yourwebsite.com" required><button class="btn">Check</button></form>
         <div class="audit-out"></div></section>
+    </div>
+
+    <div class="tab" data-pane="blitz" hidden>
+      <section class="sheet">
+        <h2>⚡ Blitz — thousands of judgments per second</h2>
+        <p class="intro">A fast rules engine: every item gets one verdict from a fixed set (Keep / Change, Steal / Skip, Answered / No page). No AI call per item, so it costs $0 and runs in seconds.</p>
+        <div class="seg" id="blitz-mode"><button data-m="site" class="on">SEO + GEO (website)</button><button data-m="ads">Ad teardown</button></div>
+        <form class="tool" id="blitz-site">
+          <input name="url" placeholder="Your site: https://yourwebsite.com" required>
+          <input name="competitors" placeholder="Competitor sites, comma separated (optional)">
+          <textarea name="questions" rows="4" placeholder="Questions buyers ask AI — one per line, optionally with monthly volume: Best plant hair dye, 1200"></textarea>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><label>Pages <input name="limit" type="number" value="25" min="1" max="100" style="width:90px"></label><button class="btn">Run Blitz</button></div>
+        </form>
+        <form class="tool" id="blitz-ads" hidden>
+          <textarea name="csv" rows="7" placeholder="brand,text,days&#10;Acme,&quot;Tired of patchy roots? 10-minute colour that lasts 6 weeks.&quot;,96"></textarea>
+          <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn">Run teardown</button><button type="button" class="btn ghost" id="ads-sample">Load sample ads</button></div>
+        </form>
+      </section>
+      <div class="live" id="blitz-stats" hidden></div>
+      <div id="blitz-out" class="blitz-grid"></div>
     </div>
 
     <div class="tab" data-pane="chat" hidden>
@@ -106,5 +126,6 @@
   </div>
 </main>
 <script src="dashboard.js"></script>
+<script src="blitz.js"></script>
 </body>
 </html>

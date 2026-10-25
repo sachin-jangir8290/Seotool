@@ -5,6 +5,7 @@ const db = require("./db");
 const { ANALYZERS, parseCSV } = require("./analyzers");
 const ai = require("./ai");
 const audit = require("./audit");
+const blitz = require("./blitz");
 
 const app = express();
 app.use(express.json({ limit: "5mb" }));
@@ -188,6 +189,56 @@ app.post("/api/chat", auth, wrap(async (req, res) => {
   const audits = db.prepare("SELECT type, url, score, created_at FROM audits WHERE user_id = ? ORDER BY id DESC LIMIT 5").all(req.user.id);
   const context = [...runs.map((r) => `Run ${r.created_at} — ${r.name}: ${r.summary}`), ...audits.map((a) => `${a.type.toUpperCase()} audit ${a.created_at} — ${a.url}: ${a.score}/100`)].join("\n");
   res.json({ reply: await ai.chat(history, context) });
+}));
+
+// ---- Blitz: fast rules-engine judgments, streamed as NDJSON so the UI fills live ----
+app.post("/api/blitz/site", auth, async (req, res) => {
+  const { url, competitors = [], questions = "", limit = 25 } = req.body || {};
+  res.type("application/x-ndjson");
+  const t0 = Date.now();
+  const stat = { pages: 0, judgments: 0 };
+  const send = (o) => res.write(JSON.stringify(o) + "\n");
+  const tick = () => send({ type: "stat", ...stat, elapsed: (Date.now() - t0) / 1000 });
+  try {
+    const max = Math.min(Number(limit) || 25, 100);
+    const ours = await blitz.crawl(String(url || ""), max, (page) => {
+      stat.pages++;
+      const els = blitz.judgeElements(page);
+      stat.judgments += els.length + 8;
+      send({ type: "elements", rows: els });
+      send({ type: "cite", row: blitz.citability(page) });
+      tick();
+    });
+    if (!ours.length) throw new Error("Could not read any pages from that site");
+    const qs = String(questions).split(/\r?\n/).map((q) => q.trim()).filter(Boolean).slice(0, 500);
+    if (qs.length) {
+      stat.judgments += qs.length * ours.length;
+      send({ type: "coverage", rows: blitz.coverage(qs, ours) });
+      tick();
+    }
+    for (const c of [].concat(competitors).map(String).filter(Boolean).slice(0, 5)) {
+      try {
+        const theirs = await blitz.crawl(c, Math.min(max, 15), () => { stat.pages++; });
+        stat.judgments += theirs.length * 6;
+        send({ type: "competitor", rows: blitz.competitorRows(theirs, ours) });
+      } catch (e) { send({ type: "warn", message: `${c}: ${e.message}` }); }
+      tick();
+    }
+    send({ type: "done", ...stat, elapsed: (Date.now() - t0) / 1000 });
+  } catch (e) {
+    send({ type: "error", message: e.message });
+  }
+  res.end();
+});
+
+app.post("/api/blitz/ads", auth, wrap((req, res) => {
+  const t0 = process.hrtime.bigint();
+  const ads = blitz.parseAds(req.body?.csv || "");
+  if (!ads.length) throw new Error("Paste ads first: one per line, or CSV with brand,text,days");
+  const rows = ads.map(blitz.teardown);
+  const cat = blitz.categorize(rows);
+  const ms = Number(process.hrtime.bigint() - t0) / 1e6;
+  res.json({ rows, category: cat, briefs: blitz.briefs(cat), stats: { ads: rows.length, judgments: rows.length * 9, brands: new Set(rows.map((r) => r.brand)).size, ms } });
 }));
 
 const PORT = process.env.PORT || 3000;
