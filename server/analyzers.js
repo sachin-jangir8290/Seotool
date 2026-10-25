@@ -129,6 +129,19 @@ Object.assign(ANALYZERS, {
   },
 });
 
+// Keyword opportunities from a Search Console export (query, page, clicks, impressions, position).
+ANALYZERS["keyword-opportunities"] = {
+  label: "Keyword opportunity finder",
+  columns: "query, page, clicks, impressions, position",
+  sample: "query,page,clicks,impressions,position\nplant hair dye,/guides/plant-dye,40,2600,13.4\nhenna for gray hair,/blog/henna,22,1900,6.1\nbest natural hair dye,/,310,4100,2.2\nhair dye without ppd,/faq,3,800,17.8",
+  run(rows) {
+    need(rows, ["query", "impressions", "position"]);
+    const out = require("./keywords").opportunities(rows.map((r) => ({ query: r.query, page: r.page || "", clicks: num(r.clicks), impressions: num(r.impressions), position: num(r.position) })), { minImpressions: 1 });
+    const gain = out.reduce((s, r) => s + r.gain, 0);
+    return { summary: `${out.length} keyword opportunities worth ~${gain} extra clicks per period.`, columns: ["query", "page", "position", "impressions", "ctr", "type", "gain", "action"], rows: out };
+  },
+};
+
 // Plugins: every .js file in /plugins (or PLUGINS_DIR) can add analyzers.
 // A plugin exports { analyzers: { "kind": { label, columns, sample, run(rows, opts) } } }.
 function loadPlugins(dir = process.env.PLUGINS_DIR || require("path").join(__dirname, "..", "plugins")) {

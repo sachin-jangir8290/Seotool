@@ -37,7 +37,7 @@
   <div id="app" hidden>
     <nav class="tabs" id="tabs">
       <button data-tab="overview" class="on">Overview</button><button data-tab="agents">Agents</button>
-      <button data-tab="seo">SEO audit</button><button data-tab="geo">AI visibility</button><button data-tab="blitz">⚡ Blitz</button><button data-tab="cite">AI Citations</button><button data-tab="rewrite">✎ Rewriter</button><button data-tab="sched">Schedules <span class="badge-n" id="alert-n" hidden></span></button><button data-tab="chat">Assistant</button>
+      <button data-tab="seo">SEO audit</button><button data-tab="geo">AI visibility</button><button data-tab="blitz">⚡ Blitz</button><button data-tab="cite">AI Citations</button><button data-tab="rewrite">✎ Rewriter</button><button data-tab="kw">Keywords</button><button data-tab="sched">Schedules <span class="badge-n" id="alert-n" hidden></span></button><button data-tab="chat">Assistant</button>
     </nav>
 
     <div class="tab" data-pane="overview">
@@ -115,17 +115,35 @@
       <section class="sheet"><h2>Past rewrites</h2><div id="rw-history"></div></section>
     </div>
 
+    <div class="tab" data-pane="kw" hidden>
+      <section class="sheet">
+        <h2>Keywords & rankings</h2>
+        <p class="intro">Opportunities and rank tracking from your Search Console data: keywords stuck on page 2, top-10 results with a weak title, and the positions you track over time.</p>
+        <div id="kw-need" hidden><p>Connect Google on the Overview tab to use live data — or use the <b>Keyword opportunity finder</b> agent with a Search Console CSV export.</p></div>
+        <div class="tool inline" id="kw-bar" hidden><select id="kw-site"></select><button class="btn" id="kw-find">Find opportunities</button></div>
+      </section>
+      <section class="sheet" id="kw-opps" hidden><header style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">Opportunities</h2>
+        <div class="seg" id="kw-filter"><button data-f="" class="on">All</button><button data-f="Striking distance">Page 2</button><button data-f="Low CTR">Low CTR</button><button data-f="Top 3 push">Top 3 push</button></div></header>
+        <div id="kw-opp-list" style="margin-top:12px"></div></section>
+      <section class="sheet" id="kw-track" hidden>
+        <header style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">Tracked keywords</h2><button class="btn ghost" id="kw-snap">Update positions now</button></header>
+        <p class="intro">Add a daily "Rank tracking" schedule on the Schedules tab to record positions automatically.</p>
+        <form class="tool inline" id="kw-add"><input name="k" placeholder="Keywords to track, comma separated"><button class="btn">Track</button></form>
+        <div id="kw-list" style="margin-top:12px"></div></section>
+    </div>
+
     <div class="tab" data-pane="sched" hidden>
       <section class="sheet">
         <h2>Schedules & alerts</h2>
         <p class="intro">Run audits, Blitz and AI-citation tracking automatically. When a score moves by more than your threshold you get an alert here, on Slack/Discord (webhook) and by email.</p>
         <form class="tool" id="sched-form">
           <div class="two">
-            <select name="type"><option value="seo">SEO audit</option><option value="geo">AI visibility (GEO)</option><option value="blitz">⚡ Blitz (avg AI-citation chance)</option><option value="citations">AI citations (needs engine keys)</option></select>
+            <select name="type"><option value="seo">SEO audit</option><option value="geo">AI visibility (GEO)</option><option value="blitz">⚡ Blitz (avg AI-citation chance)</option><option value="citations">AI citations (needs engine keys)</option><option value="ranks">Rank tracking (Search Console)</option></select>
             <select name="cadence"><option value="daily">Daily</option><option value="weekly" selected>Weekly</option><option value="monthly">Monthly</option><option value="hourly">Hourly</option></select>
           </div>
           <input name="name" placeholder="Name (optional)">
           <div data-for="url"><input name="url" placeholder="https://yourwebsite.com"></div>
+          <div data-for="ranks" hidden><input name="site" placeholder="Search Console site, e.g. sc-domain:example.com"></div>
           <div data-for="citations" hidden class="tool">
             <div class="two"><input name="brand" placeholder="Brand name"><input name="domain" placeholder="yourdomain.com"></div>
             <textarea name="competitors" rows="2" placeholder="Competitors: Name | domain.com (one per line)"></textarea>
@@ -190,5 +208,6 @@
 <script src="schedules.js"></script>
 <script src="rewrite.js"></script>
 <script src="connections.js"></script>
+<script src="keywords.js"></script>
 </body>
 </html>

@@ -5,6 +5,7 @@ const audit = require("./audit");
 const blitz = require("./blitz");
 const citations = require("./citations");
 const engines = require("./engines");
+const keywords = require("./keywords");
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS schedules (
@@ -23,7 +24,7 @@ db.exec(`
 `);
 
 const CADENCE_MS = { hourly: 36e5, daily: 864e5, weekly: 7 * 864e5, monthly: 30 * 864e5 };
-const TYPES = ["seo", "geo", "blitz", "citations"];
+const TYPES = ["seo", "geo", "blitz", "citations", "ranks"];
 
 // Each job returns { score (0-100), detail } and saves its run where the manual feature would.
 const JOBS = {
@@ -46,6 +47,10 @@ const JOBS = {
     const changes = pages.flatMap(blitz.judgeElements).filter((e) => e.verdict === "Change").length;
     const avg = Math.round(cites.reduce((a, c) => a + c.chance, 0) / cites.length);
     return { score: avg, detail: `${pages.length} pages · ${changes} elements to change · avg AI-citation chance ${avg}%` };
+  },
+  async ranks(s, cfg) {
+    const r = await keywords.snapshot(s.user_id, cfg.site);
+    return { score: r.score, detail: `${r.top10} of ${r.tracked} tracked keywords in the top 10 (${r.found} ranking at all)` };
   },
   async citations(s, cfg) {
     const enabled = engines.available().filter((e) => e.enabled).map((e) => e.id);

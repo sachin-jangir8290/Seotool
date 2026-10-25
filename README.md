@@ -14,6 +14,7 @@ Run **Google Ads, Meta Ads, SEO and AI search (GEO)** with a team of AI agents �
   - ad teardown: hook, format, offer, awareness, driver, CTA, claim risk → patterns that survive → briefs
 - **AI citation tracking** — asks Claude, ChatGPT, Gemini and Perplexity your buyer questions; shows citation rate, position, sentiment, whether your site is cited, and who gets named instead (each engine runs only when its API key is set)
 - **Google connection (Search Console + GA4)** — OAuth, read-only, tokens encrypted at rest; import live data straight into agents: click-loss and cannibalization (Search Console), landing pages and **AI-assistant referrals** — visits and key events from ChatGPT, Perplexity, Claude, Gemini, Copilot (GA4)
+- **Keywords & rankings** — opportunities from Search Console (page-2 "striking distance", top-10 with weak CTR, top-3 pushes, pages competing for one query) with estimated extra clicks; track keywords and record positions daily with a "Rank tracking" schedule
 - **✎ Page rewriter** — turns Blitz "Change" verdicts into drafts (title, meta, H1, answer-first intro, FAQ, FAQ/Article schema, canonical) with Claude or free rules mode; edit, approve or reject each one and copy the approved HTML
 - **Schedules & alerts** — run SEO audits, AI visibility, Blitz and AI-citation tracking hourly/daily/weekly/monthly; get an alert in the dashboard, on Slack/Discord (webhook) or by email when a score moves past your threshold
 - **SEO audit** — 14 on-page checks with a 0–100 score
@@ -85,7 +86,7 @@ Add a new agent by dropping one file into `plugins/` — see [CONTRIBUTING.md](C
 - [ ] Live connections: Google Ads, Meta Ads
 - [x] Scheduled runs with email / Slack alerts
 - [x] One-click AI rewrites for Blitz "Change" verdicts
-- [ ] Keyword research and rank tracking
+- [x] Keyword opportunities and rank tracking (Search Console)
 - [ ] Multi-client agency mode and white-label reports
 - [ ] UI translations (Hindi first)
 
