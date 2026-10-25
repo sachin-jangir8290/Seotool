@@ -29,7 +29,8 @@
   "homepage": "https://github.com/sachin-jangir8290/Seotool#readme",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",
-    "express": "^4.22.3"
+    "express": "^4.22.3",
+    "nodemailer": "^10.2.1"
   },
   "engines": {
     "node": ">=22.5"

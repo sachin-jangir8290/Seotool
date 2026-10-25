@@ -259,3 +259,16 @@ label.chk input { accent-color: var(--p1); margin-top: 4px; }
 .q small { color: var(--muted); display: block; margin-top: 4px; }
 .q details { margin-top: 6px; } .q details p { white-space: pre-wrap; font-size: 12px; color: var(--muted); max-height: 200px; overflow: auto; }
 @media (max-width: 640px) { .two { grid-template-columns: 1fr; } }
+
+/* schedules */
+.badge-n { background: #d93a3a; color: #fff; font-size: 11px; border-radius: 10px; padding: 1px 7px; margin-left: 4px; }
+.sched { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; border-bottom: 1px solid var(--line); padding: 14px 0; }
+.sched b.name { font-size: 15px; } .sched small { color: var(--muted); display: block; }
+.sched .acts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+.spark { display: inline-flex; gap: 2px; align-items: flex-end; height: 28px; vertical-align: middle; margin-right: 8px; }
+.spark i { width: 7px; background: var(--grad); border-radius: 2px; } .spark i.err { background: #d93a3a; height: 4px !important; }
+.alert { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.alert.unread { font-weight: 600; }
+.alert i { font-style: normal; width: 24px; height: 24px; flex: none; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 12px; }
+.alert i.drop, .alert i.error { background: #d93a3a; } .alert i.rise { background: #16a36a; }
+.switch { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; }

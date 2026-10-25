@@ -8,6 +8,7 @@ const audit = require("./audit");
 const blitz = require("./blitz");
 const engines = require("./engines");
 const citations = require("./citations");
+const scheduler = require("./scheduler");
 
 const app = express();
 app.use(express.json({ limit: "5mb" }));
@@ -286,6 +287,73 @@ app.get("/api/citations/runs/:id", auth, wrap((req, res) => {
   res.json({ ...r, config: JSON.parse(r.config), summary: JSON.parse(r.summary || "[]"), rows: JSON.parse(r.rows || "[]") });
 }));
 
+// ---- schedules & alerts ----
+const ownSchedule = (req) => {
+  const s = db.prepare("SELECT * FROM schedules WHERE id = ? AND user_id = ?").get(req.params.id, req.user.id);
+  if (!s) throw new Error("Schedule not found");
+  return s;
+};
+const cleanDomain = (d) => String(d || "").trim().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/.*$/, "");
+
+app.get("/api/schedules", auth, (req, res) => {
+  const rows = db.prepare("SELECT * FROM schedules WHERE user_id = ? ORDER BY id DESC").all(req.user.id);
+  const hist = db.prepare("SELECT score, error, created_at FROM schedule_results WHERE schedule_id = ? ORDER BY id DESC LIMIT 12");
+  res.json(rows.map((s) => ({ ...s, config: JSON.parse(s.config), history: hist.all(s.id).reverse() })));
+});
+
+app.post("/api/schedules", auth, wrap((req, res) => {
+  const b = req.body || {};
+  if (!scheduler.TYPES.includes(b.type)) throw new Error("Unknown schedule type");
+  if (!scheduler.CADENCE_MS[b.cadence]) throw new Error("Unknown cadence");
+  let config;
+  if (b.type === "citations") {
+    const questions = String(b.questions || "").split(/\r?\n/).map((q) => q.trim()).filter(Boolean).slice(0, 50);
+    if (!b.brand || !questions.length) throw new Error("Brand and questions are required");
+    const competitors = String(b.competitors || "").split(/\n/).map((c) => c.trim()).filter(Boolean).slice(0, 10)
+      .map((c) => { const [name, domain] = c.split(/\s*[|:]\s*/); return { name, domain: cleanDomain(domain) }; });
+    config = { brand: { name: String(b.brand).trim(), domain: cleanDomain(b.domain), aliases: [] }, competitors, questions };
+  } else {
+    if (!b.url) throw new Error("URL is required");
+    config = { url: String(b.url).trim(), limit: Number(b.limit) || 25 };
+  }
+  const name = String(b.name || "").trim() || `${b.type.toUpperCase()} · ${config.url || config.brand.name}`;
+  const { lastInsertRowid } = db.prepare(`INSERT INTO schedules (user_id, name, type, config, cadence, threshold, email, webhook, next_run_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(req.user.id, name, b.type, JSON.stringify(config), b.cadence,
+    Math.max(1, Number(b.threshold) || 5), String(b.email || "").trim() || null, String(b.webhook || "").trim() || null, Date.now());
+  res.json({ id: Number(lastInsertRowid) });
+}));
+
+app.patch("/api/schedules/:id", auth, wrap((req, res) => {
+  ownSchedule(req);
+  db.prepare("UPDATE schedules SET enabled = ? WHERE id = ?").run(req.body?.enabled ? 1 : 0, req.params.id);
+  res.json({ ok: true });
+}));
+
+app.delete("/api/schedules/:id", auth, wrap((req, res) => {
+  ownSchedule(req);
+  db.prepare("DELETE FROM schedules WHERE id = ?").run(req.params.id);
+  res.json({ ok: true });
+}));
+
+app.post("/api/schedules/:id/run", auth, wrap(async (req, res) => {
+  ownSchedule(req);
+  res.json(await scheduler.runSchedule(Number(req.params.id)));
+}));
+
+app.get("/api/alerts", auth, (req, res) => {
+  res.json({
+    unread: db.prepare("SELECT COUNT(*) n FROM alerts WHERE user_id = ? AND read = 0").get(req.user.id).n,
+    alerts: db.prepare("SELECT * FROM alerts WHERE user_id = ? ORDER BY id DESC LIMIT 50").all(req.user.id),
+  });
+});
+app.post("/api/alerts/read", auth, (req, res) => {
+  db.prepare("UPDATE alerts SET read = 1 WHERE user_id = ?").run(req.user.id);
+  res.json({ ok: true });
+});
+
 const PORT = process.env.PORT || 3000;
-if (require.main === module) app.listen(PORT, () => console.log(`SEOTool running on http://localhost:${PORT}`));
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`SEOTool running on http://localhost:${PORT}`));
+  if (process.env.SCHEDULER !== "off") scheduler.start();
+}
 module.exports = app;

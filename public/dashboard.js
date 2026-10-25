@@ -36,7 +36,7 @@ function showTab(name) {
   document.querySelectorAll(".tab").forEach((t) => (t.hidden = t.dataset.pane !== name));
   if (name === "overview") loadOverview();
 }
-$("#tabs").onclick = (e) => e.target.dataset.tab && showTab(e.target.dataset.tab);
+$("#tabs").onclick = (e) => { const b = e.target.closest("[data-tab]"); if (b) showTab(b.dataset.tab); };
 document.addEventListener("click", (e) => e.target.dataset.go && showTab(e.target.dataset.go));
 
 // ---- overview ----

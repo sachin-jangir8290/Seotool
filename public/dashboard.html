@@ -37,7 +37,7 @@
   <div id="app" hidden>
     <nav class="tabs" id="tabs">
       <button data-tab="overview" class="on">Overview</button><button data-tab="agents">Agents</button>
-      <button data-tab="seo">SEO audit</button><button data-tab="geo">AI visibility</button><button data-tab="blitz">⚡ Blitz</button><button data-tab="cite">AI Citations</button><button data-tab="chat">Assistant</button>
+      <button data-tab="seo">SEO audit</button><button data-tab="geo">AI visibility</button><button data-tab="blitz">⚡ Blitz</button><button data-tab="cite">AI Citations</button><button data-tab="sched">Schedules <span class="badge-n" id="alert-n" hidden></span></button><button data-tab="chat">Assistant</button>
     </nav>
 
     <div class="tab" data-pane="overview">
@@ -100,6 +100,31 @@
       <section class="sheet"><h2>Past runs</h2><div id="cite-history"></div></section>
     </div>
 
+    <div class="tab" data-pane="sched" hidden>
+      <section class="sheet">
+        <h2>Schedules & alerts</h2>
+        <p class="intro">Run audits, Blitz and AI-citation tracking automatically. When a score moves by more than your threshold you get an alert here, on Slack/Discord (webhook) and by email.</p>
+        <form class="tool" id="sched-form">
+          <div class="two">
+            <select name="type"><option value="seo">SEO audit</option><option value="geo">AI visibility (GEO)</option><option value="blitz">⚡ Blitz (avg AI-citation chance)</option><option value="citations">AI citations (needs engine keys)</option></select>
+            <select name="cadence"><option value="daily">Daily</option><option value="weekly" selected>Weekly</option><option value="monthly">Monthly</option><option value="hourly">Hourly</option></select>
+          </div>
+          <input name="name" placeholder="Name (optional)">
+          <div data-for="url"><input name="url" placeholder="https://yourwebsite.com"></div>
+          <div data-for="citations" hidden class="tool">
+            <div class="two"><input name="brand" placeholder="Brand name"><input name="domain" placeholder="yourdomain.com"></div>
+            <textarea name="competitors" rows="2" placeholder="Competitors: Name | domain.com (one per line)"></textarea>
+            <textarea name="questions" rows="3" placeholder="Buyer questions, one per line"></textarea>
+          </div>
+          <div class="two"><input name="email" type="email" placeholder="Alert email (needs SMTP on server)"><input name="webhook" placeholder="Slack / Discord webhook URL (optional)"></div>
+          <label>Alert when the score changes by at least <input name="threshold" type="number" value="5" min="1" max="100" style="width:80px"> points</label>
+          <div><button class="btn">Create schedule</button></div>
+        </form>
+      </section>
+      <section class="sheet"><h2>Your schedules</h2><div id="sched-list"></div></section>
+      <section class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2>Alerts</h2><button class="btn ghost" id="alerts-read">Mark all read</button></div><div id="alert-list"></div></section>
+    </div>
+
     <div class="tab" data-pane="chat" hidden>
       <section class="sheet"><h2>Marketing assistant</h2><p class="intro">Ask about your campaigns, audits and agent results. It reads your latest runs and audits.</p>
         <div id="chat-log" class="chat-log"></div>
@@ -146,5 +171,6 @@
 <script src="dashboard.js"></script>
 <script src="blitz.js"></script>
 <script src="citations.js"></script>
+<script src="schedules.js"></script>
 </body>
 </html>
