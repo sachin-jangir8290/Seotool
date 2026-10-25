@@ -11,6 +11,7 @@ const citations = require("./citations");
 const scheduler = require("./scheduler");
 const rewriter = require("./rewriter");
 const google = require("./google");
+const keywords = require("./keywords");
 
 const app = express();
 // Behind Render/Railway/nginx the client IP and https come from X-Forwarded-* headers.
@@ -351,6 +352,20 @@ app.get("/api/google/report", auth, wrap(async (req, res) => {
   res.json(await google.report(req.user.id, String(req.query.site || ""), String(req.query.kind || ""), days));
 }));
 
+// ---- keywords: opportunities + rank tracking (Search Console) ----
+const siteParam = (req) => { const s = String(req.query.site || req.body?.site || ""); if (!s) throw new Error("Pick a Search Console site"); return s; };
+app.get("/api/keywords/opportunities", auth, wrap(async (req, res) => {
+  const rows = await keywords.fetchQueryRows(req.user.id, siteParam(req));
+  res.json(keywords.opportunities(rows, { minImpressions: Number(req.query.min) || 50 }).slice(0, 200));
+}));
+app.get("/api/keywords/tracked", auth, wrap((req, res) => res.json(keywords.history(req.user.id, siteParam(req)))));
+app.post("/api/keywords/track", auth, wrap((req, res) => {
+  const list = [].concat(req.body?.keywords || []).flatMap((k) => String(k).split(/[\n,]/));
+  res.json({ added: keywords.track(req.user.id, siteParam(req), list) });
+}));
+app.delete("/api/keywords/track", auth, wrap((req, res) => { keywords.untrack(req.user.id, siteParam(req), String(req.query.keyword || "")); res.json({ ok: true }); }));
+app.post("/api/keywords/snapshot", auth, wrap(async (req, res) => res.json(await keywords.snapshot(req.user.id, siteParam(req)))));
+
 // ---- page rewriter: drafts for Blitz "Change" verdicts, approved item by item ----
 const ownRewrite = (req) => {
   const r = db.prepare("SELECT * FROM rewrites WHERE id = ? AND user_id = ?").get(req.params.id, req.user.id);
@@ -413,11 +428,14 @@ app.post("/api/schedules", auth, wrap((req, res) => {
     const competitors = String(b.competitors || "").split(/\n/).map((c) => c.trim()).filter(Boolean).slice(0, 10)
       .map((c) => { const [name, domain] = c.split(/\s*[|:]\s*/); return { name, domain: cleanDomain(domain) }; });
     config = { brand: { name: String(b.brand).trim(), domain: cleanDomain(b.domain), aliases: [] }, competitors, questions };
+  } else if (b.type === "ranks") {
+    if (!b.site) throw new Error("Search Console site is required");
+    config = { site: String(b.site).trim() };
   } else {
     if (!b.url) throw new Error("URL is required");
     config = { url: String(b.url).trim(), limit: Number(b.limit) || 25 };
   }
-  const name = String(b.name || "").trim() || `${b.type.toUpperCase()} · ${config.url || config.brand.name}`;
+  const name = String(b.name || "").trim() || `${b.type.toUpperCase()} · ${config.url || config.site || config.brand.name}`;
   const { lastInsertRowid } = db.prepare(`INSERT INTO schedules (user_id, name, type, config, cadence, threshold, email, webhook, next_run_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(req.user.id, name, b.type, JSON.stringify(config), b.cadence,
     Math.max(1, Number(b.threshold) || 5), String(b.email || "").trim() || null, String(b.webhook || "").trim() || null, Date.now());

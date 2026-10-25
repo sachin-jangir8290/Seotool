@@ -1,13 +1,14 @@
 // Schedules tab + alert badge. Uses $, esc and api from dashboard.js.
-const TYPE_LABEL = { seo: "SEO audit", geo: "AI visibility", blitz: "⚡ Blitz", citations: "AI citations" };
+const TYPE_LABEL = { seo: "SEO audit", geo: "AI visibility", blitz: "⚡ Blitz", citations: "AI citations", ranks: "Rank tracking" };
 const ago = (ms) => { if (!ms) return "never"; const m = Math.round((Date.now() - ms) / 60000); return m < 1 ? "just now" : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
 const until = (ms) => { const m = Math.round((ms - Date.now()) / 60000); return m <= 0 ? "due now" : m < 60 ? `in ${m} min` : m < 1440 ? `in ${Math.round(m / 60)} h` : `in ${Math.round(m / 1440)} d`; };
 
 const schedForm = $("#sched-form");
 schedForm.type.onchange = () => {
-  const c = schedForm.type.value === "citations";
-  schedForm.querySelector('[data-for="url"]').hidden = c;
-  schedForm.querySelector('[data-for="citations"]').hidden = !c;
+  const t = schedForm.type.value;
+  schedForm.querySelector('[data-for="url"]').hidden = t === "citations" || t === "ranks";
+  schedForm.querySelector('[data-for="citations"]').hidden = t !== "citations";
+  schedForm.querySelector('[data-for="ranks"]').hidden = t !== "ranks";
 };
 schedForm.onsubmit = async (e) => {
   e.preventDefault();

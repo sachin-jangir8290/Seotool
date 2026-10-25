@@ -202,4 +202,4 @@ async function ga4Report(userId, property, kind, days = 28) {
   throw new Error("Unknown GA4 report");
 }
 
-module.exports = { ga4Properties, ga4Report, AI_SOURCES, configured, redirectUri, authUrl, handleCallback, connection, accessToken, disconnect, sites, report, seal, open, URLS };
+module.exports = { searchAnalytics: query, day, ga4Properties, ga4Report, AI_SOURCES, configured, redirectUri, authUrl, handleCallback, connection, accessToken, disconnect, sites, report, seal, open, URLS };

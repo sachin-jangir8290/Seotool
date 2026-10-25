@@ -49,6 +49,7 @@ Please add a test in `test/` for your agent.
 | `server/audit.js` | SEO audit and AI-visibility check |
 | `server/engines.js`, `server/citations.js` | AI citation tracking (Claude, ChatGPT, Gemini, Perplexity) |
 | `server/google.js` | Google OAuth + Search Console and GA4 reports |
+| `server/keywords.js` | Keyword opportunities and rank tracking |
 | `server/rewriter.js` | Page rewriter (AI + rules drafts, HTML export) |
 | `server/scheduler.js` | Scheduled runs, alerts (dashboard, webhook, email) |
 | `server/ai.js` | Claude-powered agents and assistant (optional) |
