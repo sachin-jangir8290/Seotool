@@ -29,6 +29,7 @@ function bindChecklist(id, total, verdict) {
     const state = {};
     root.querySelectorAll("input").forEach((i) => { if (i.checked) state[i.dataset.k] = 1; });
     store.set("chk-" + id, state);
+    if (loggedIn) fetch("/api/progress/" + id, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(state) });
     const done = Object.keys(state).length;
     $("#score-" + id).innerHTML = `<b>${done}</b> / ${total} done — ${verdict(done, total)}<div class="bar"><i style="width:${(done / total) * 100}%"></i></div>`;
   };
@@ -96,9 +97,13 @@ const SHEETS = [
 
 function render() {
   $("#stats").innerHTML = DATA.stats.map(([n, l]) => `<span><b>${n}</b> ${l}</span>`).join("");
+  const icons = { google: "◎", meta: "◆", seo: "↗", geo: "✦" };
+  const teamSheet0 = SHEETS.findIndex((x) => x[0] === DATA.teams.google.title);
+  $("#svc").innerHTML = Object.entries(DATA.teams).map(([k, t], i) =>
+    `<a href="#s${teamSheet0 + i + 1}"><div class="ico">${icons[k]}</div><h3>${esc(t.title.replace(/^The | agent team$/g, ""))}</h3><p>${esc(t.agents.slice(0, 3).map((a) => a[0]).join(", "))} and more.</p><span>${t.agents.length} agents →</span></a>`).join("");
   $("#toc").innerHTML = SHEETS.map((s, i) => `<a href="#s${i + 1}">${i + 1}. ${esc(s[0])}</a>`).join("");
   $("#sheets").innerHTML = SHEETS.map(([title, intro, body, wide], i) =>
-    `<section class="sheet ${wide ? "wide" : ""}" id="s${i + 1}"><div class="num">${String(i + 1).padStart(2, "0")} / ${SHEETS.length}</div><h2>${esc(title)}</h2><p class="intro">${esc(intro)}</p>${body()}</section>`).join("");
+    `<section class="sheet ${wide ? "wide" : ""}" id="s${i + 1}"><div class="num">Sheet ${String(i + 1).padStart(2, "0")}</div><h2>${esc(title)}</h2><p class="intro">${esc(intro)}</p>${body()}</section>`).join("");
 
   // Ladder
   document.querySelectorAll(".ladder button").forEach((b) => b.addEventListener("click", () => {
@@ -133,4 +138,16 @@ function render() {
   $("#pb-copy").addEventListener("click", () => navigator.clipboard?.writeText($("#pb-out").textContent));
 }
 
-render();
+// When served by the backend and signed in, checklist progress syncs to the account.
+let loggedIn = false;
+(async () => {
+  try {
+    const me = await (await fetch("/api/me")).json();
+    if (me.user) {
+      loggedIn = true;
+      const saved = await (await fetch("/api/progress")).json();
+      Object.entries(saved).forEach(([k, v]) => store.set("chk-" + k, v));
+    }
+  } catch {}
+  render();
+})();

@@ -1,0 +1,38 @@
+{
+  "name": "seotool",
+  "version": "1.0.0",
+  "description": "Open-source agentic marketing toolkit: AI agents, SEO audits, AI-search (GEO) visibility and fast Blitz judgments for Google Ads, Meta Ads and SEO.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sachin-jangir8290/Seotool.git"
+  },
+  "keywords": [
+    "seo",
+    "geo",
+    "ai-search",
+    "google-ads",
+    "meta-ads",
+    "marketing",
+    "agents",
+    "open-source"
+  ],
+  "author": "SEOTool contributors",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sachin-jangir8290/Seotool/issues"
+  },
+  "homepage": "https://github.com/sachin-jangir8290/Seotool#readme",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
+    "express": "^4.22.3",
+    "nodemailer": "^10.2.1"
+  },
+  "engines": {
+    "node": ">=22.5"
+  }
+}

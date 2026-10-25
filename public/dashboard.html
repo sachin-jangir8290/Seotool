@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<nav class="nav">
+  <div class="wrap nav-in">
+    <a href="/" class="logo"><span class="logo-mark">S</span>SEOTool</a>
+    <div style="display:flex;gap:10px;align-items:center"><span class="badge" id="who">not signed in</span><a href="/" class="btn outline">Guide</a><button class="btn ghost" id="logout">Log out</button></div>
+  </div>
+</nav>
+<header class="page-head">
+  <div class="wrap">
+    <h1>Agent dashboard</h1>
+    <p>Create agents, feed them data, review what they propose, approve or reject.</p>
+  </div>
+</header>
+
+<main class="wrap dash">
+  <section class="sheet" id="auth-box" hidden>
+    <h2>Sign in</h2>
+    <p class="intro">Your agents, runs and checklists are saved to your account.</p>
+    <form class="tool" id="auth-form">
+      <input name="name" placeholder="Name (sign-up only)">
+      <input name="email" type="email" placeholder="Email" required>
+      <input name="password" type="password" placeholder="Password (min 8 chars)" required>
+      <div style="display:flex;gap:8px"><button class="btn" data-mode="login">Log in</button><button class="btn ghost" data-mode="signup">Create account</button></div>
+      <p id="auth-err" style="color:#d93a3a;margin:0"></p>
+    </form>
+  </section>
+
+  <div id="app" hidden>
+    <nav class="tabs" id="tabs">
+      <button data-tab="overview" class="on">Overview</button><button data-tab="agents">Agents</button>
+      <button data-tab="seo">SEO audit</button><button data-tab="geo">AI visibility</button><button data-tab="blitz">⚡ Blitz</button><button data-tab="cite">AI Citations</button><button data-tab="rewrite">✎ Rewriter</button><button data-tab="sched">Schedules <span class="badge-n" id="alert-n" hidden></span></button><button data-tab="chat">Assistant</button>
+    </nav>
+
+    <div class="tab" data-pane="overview">
+      <div class="kpi-row" id="kpis"></div>
+      <section class="sheet"><h2>Quick start</h2><p class="intro">Three things to do first.</p>
+        <div class="steps mini"><div><b>01</b><h3>Audit your site</h3><p>Get an SEO score and fix list.</p><button class="btn" data-go="seo">Run SEO audit</button></div>
+        <div><b>02</b><h3>Check AI visibility</h3><p>Can ChatGPT, Claude and Perplexity read you?</p><button class="btn" data-go="geo">Check now</button></div>
+        <div><b>03</b><h3>Create an agent</h3><p>Upload a CSV and get proposals to approve.</p><button class="btn" data-go="agents">New agent</button></div></div>
+      </section>
+      <section class="sheet" id="conn-card"><h2>Connections</h2><p class="intro">Connect your accounts so agents read live data instead of CSV exports.</p><div id="conn-list"></div></section>
+      <section class="sheet"><h2>Recent audits</h2><div id="audit-list"></div></section>
+    </div>
+
+    <div class="tab" data-pane="seo" hidden>
+      <section class="sheet"><h2>SEO site audit</h2><p class="intro">14 on-page checks: title, meta, headings, alt text, speed, indexability and more.</p>
+        <form class="tool inline" data-audit="seo"><input name="url" placeholder="https://yourwebsite.com" required><button class="btn">Audit</button></form>
+        <div class="audit-out"></div></section>
+    </div>
+
+    <div class="tab" data-pane="geo" hidden>
+      <section class="sheet"><h2>AI search visibility (GEO)</h2><p class="intro">Checks AI crawler access in robots.txt, llms.txt, structured data and answer-friendly content.</p>
+        <form class="tool inline" data-audit="geo"><input name="url" placeholder="https://yourwebsite.com" required><button class="btn">Check</button></form>
+        <div class="audit-out"></div></section>
+    </div>
+
+    <div class="tab" data-pane="blitz" hidden>
+      <section class="sheet">
+        <h2>⚡ Blitz — thousands of judgments per second</h2>
+        <p class="intro">A fast rules engine: every item gets one verdict from a fixed set (Keep / Change, Steal / Skip, Answered / No page). No AI call per item, so it costs $0 and runs in seconds.</p>
+        <div class="seg" id="blitz-mode"><button data-m="site" class="on">SEO + GEO (website)</button><button data-m="ads">Ad teardown</button></div>
+        <form class="tool" id="blitz-site">
+          <input name="url" placeholder="Your site: https://yourwebsite.com" required>
+          <input name="competitors" placeholder="Competitor sites, comma separated (optional)">
+          <textarea name="questions" rows="4" placeholder="Questions buyers ask AI — one per line, optionally with monthly volume: Best plant hair dye, 1200"></textarea>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><label>Pages <input name="limit" type="number" value="25" min="1" max="100" style="width:90px"></label><button class="btn">Run Blitz</button></div>
+        </form>
+        <form class="tool" id="blitz-ads" hidden>
+          <textarea name="csv" rows="7" placeholder="brand,text,days&#10;Acme,&quot;Tired of patchy roots? 10-minute colour that lasts 6 weeks.&quot;,96"></textarea>
+          <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn">Run teardown</button><button type="button" class="btn ghost" id="ads-sample">Load sample ads</button></div>
+        </form>
+      </section>
+      <div class="live" id="blitz-stats" hidden></div>
+      <div id="blitz-out" class="blitz-grid"></div>
+    </div>
+
+    <div class="tab" data-pane="cite" hidden>
+      <section class="sheet">
+        <h2>AI citation tracking</h2>
+        <p class="intro">Asks ChatGPT, Claude, Gemini and Perplexity the questions real buyers ask, then checks every answer: are you named, at what position, how positively, is your site cited — and who gets named instead.</p>
+        <div class="engines" id="cite-engines"></div>
+        <form class="tool" id="cite-form">
+          <div class="two"><input name="brand" placeholder="Brand name (e.g. Glowberry)" required><input name="domain" placeholder="Your domain (glowberry.com)"></div>
+          <input name="aliases" placeholder="Other names for your brand, comma separated (optional)">
+          <textarea name="competitors" rows="3" placeholder="Competitors, one per line: Name | domain.com"></textarea>
+          <textarea name="questions" rows="5" placeholder="Buyer questions, one per line: Best plant-based hair dye for gray hair" required></textarea>
+          <div><button class="btn">Run tracking</button></div>
+        </form>
+      </section>
+      <div class="live" id="cite-stats" hidden></div>
+      <div class="engine-grid" id="cite-out"></div>
+      <section class="sheet"><h2>Past runs</h2><div id="cite-history"></div></section>
+    </div>
+
+    <div class="tab" data-pane="rewrite" hidden>
+      <section class="sheet">
+        <h2>✎ Page rewriter</h2>
+        <p class="intro">Turns every "Change" verdict into a ready-to-paste draft: title, meta, H1, answer-first intro, FAQ and schema. Review each one — edit, approve or reject — then copy the approved HTML.</p>
+        <form class="tool inline" id="rw-form">
+          <input name="url" placeholder="https://yourwebsite.com/page" required>
+          <button class="btn">Rewrite</button>
+        </form>
+        <div class="seg" id="rw-mode" style="margin-top:12px"><button type="button" data-m="ai" class="on">AI (Claude)</button><button type="button" data-m="rules">Rules (free, no key)</button></div>
+      </section>
+      <div id="rw-out"></div>
+      <section class="sheet"><h2>Past rewrites</h2><div id="rw-history"></div></section>
+    </div>
+
+    <div class="tab" data-pane="sched" hidden>
+      <section class="sheet">
+        <h2>Schedules & alerts</h2>
+        <p class="intro">Run audits, Blitz and AI-citation tracking automatically. When a score moves by more than your threshold you get an alert here, on Slack/Discord (webhook) and by email.</p>
+        <form class="tool" id="sched-form">
+          <div class="two">
+            <select name="type"><option value="seo">SEO audit</option><option value="geo">AI visibility (GEO)</option><option value="blitz">⚡ Blitz (avg AI-citation chance)</option><option value="citations">AI citations (needs engine keys)</option></select>
+            <select name="cadence"><option value="daily">Daily</option><option value="weekly" selected>Weekly</option><option value="monthly">Monthly</option><option value="hourly">Hourly</option></select>
+          </div>
+          <input name="name" placeholder="Name (optional)">
+          <div data-for="url"><input name="url" placeholder="https://yourwebsite.com"></div>
+          <div data-for="citations" hidden class="tool">
+            <div class="two"><input name="brand" placeholder="Brand name"><input name="domain" placeholder="yourdomain.com"></div>
+            <textarea name="competitors" rows="2" placeholder="Competitors: Name | domain.com (one per line)"></textarea>
+            <textarea name="questions" rows="3" placeholder="Buyer questions, one per line"></textarea>
+          </div>
+          <div class="two"><input name="email" type="email" placeholder="Alert email (needs SMTP on server)"><input name="webhook" placeholder="Slack / Discord webhook URL (optional)"></div>
+          <label>Alert when the score changes by at least <input name="threshold" type="number" value="5" min="1" max="100" style="width:80px"> points</label>
+          <div><button class="btn">Create schedule</button></div>
+        </form>
+      </section>
+      <section class="sheet"><h2>Your schedules</h2><div id="sched-list"></div></section>
+      <section class="sheet"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2>Alerts</h2><button class="btn ghost" id="alerts-read">Mark all read</button></div><div id="alert-list"></div></section>
+    </div>
+
+    <div class="tab" data-pane="chat" hidden>
+      <section class="sheet"><h2>Marketing assistant</h2><p class="intro">Ask about your campaigns, audits and agent results. It reads your latest runs and audits.</p>
+        <div id="chat-log" class="chat-log"></div>
+        <form class="tool inline" id="chat-form"><input name="q" placeholder="e.g. Which fix from my last audit should I do first?" required autocomplete="off"><button class="btn">Send</button></form>
+      </section>
+    </div>
+
+    <div class="tab" data-pane="agents" hidden style="display:grid;gap:24px">
+    <section class="sheet">
+      <h2>New agent</h2>
+      <p class="intro">Built-in agents analyse a CSV export. "Custom AI agent" uses Claude with your role and rules.</p>
+      <form class="tool" id="new-agent">
+        <select name="kind" id="kind"></select>
+        <input name="name" placeholder="Agent name" required>
+        <input name="role" placeholder="Role (one sentence)">
+        <textarea name="rules" placeholder="Rules and limits"></textarea>
+        <select name="cadence"><option>Daily</option><option selected>Weekly</option><option>Monthly</option></select>
+        <button class="btn">Create agent</button>
+      </form>
+    </section>
+
+    <section class="sheet">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <h2>Your agents</h2>
+      </div>
+      <div id="agents"></div>
+    </section>
+
+    <section class="sheet" id="runner" hidden>
+      <h2 id="run-title"></h2>
+      <p class="intro" id="run-cols"></p>
+      <div class="tool">
+        <div id="gsc-import" class="tool inline" hidden><select id="gsc-site"></select><button type="button" class="btn ghost" id="gsc-btn">Import from Search Console</button></div>
+        <input type="file" id="csv-file" accept=".csv,text/csv,text/plain">
+        <textarea id="csv" rows="8" placeholder="…or paste CSV here"></textarea>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="run-btn">Run agent</button><button class="btn ghost" id="sample-btn">Load sample data</button></div>
+      </div>
+      <div id="run-out" style="margin-top:12px"></div>
+      <h3 style="margin-top:20px">Run history</h3>
+      <div id="history"></div>
+    </section>
+    </div>
+  </div>
+</main>
+<script src="dashboard.js"></script>
+<script src="blitz.js"></script>
+<script src="citations.js"></script>
+<script src="schedules.js"></script>
+<script src="rewrite.js"></script>
+<script src="connections.js"></script>
+</body>
+</html>
