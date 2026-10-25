@@ -2,7 +2,7 @@ services:
   seotool:
     build: .
     ports:
-      - "127.0.0.1:3000:3000"   # only reachable through the HTTPS proxy on the same server
+      - "127.0.0.1:${HOST_PORT:-3000}:3000"   # only reachable through the HTTPS proxy on the same server
     environment:
       # Optional: enables Custom AI agents and the Assistant
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
