@@ -284,3 +284,11 @@ label.chk input { accent-color: var(--p1); margin-top: 4px; }
 .rw-item .len { font-size: 11px; color: var(--muted); }
 .rw-actions { display: flex; gap: 8px; }
 .rw-export { white-space: pre-wrap; max-height: 360px; overflow: auto; }
+
+/* connections */
+.conn { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.conn .logo-g { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-weight: 800; color: #fff; flex: none; }
+.conn div.info { flex: 1; min-width: 200px; } .conn small { color: var(--muted); display: block; }
+.conn code { font-size: 11px; background: var(--soft); padding: 2px 6px; border-radius: 4px; word-break: break-all; }
+.flash-msg { padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; }
+.flash-msg.ok { background: #e7f8ef; color: #127a50; } .flash-msg.err { background: #fdeaea; color: #b42323; }

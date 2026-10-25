@@ -10,6 +10,7 @@ const engines = require("./engines");
 const citations = require("./citations");
 const scheduler = require("./scheduler");
 const rewriter = require("./rewriter");
+const google = require("./google");
 
 const app = express();
 app.use(express.json({ limit: "5mb" }));
@@ -286,6 +287,34 @@ app.get("/api/citations/runs/:id", auth, wrap((req, res) => {
   const r = db.prepare("SELECT * FROM citation_runs WHERE id = ? AND user_id = ?").get(req.params.id, req.user.id);
   if (!r) throw new Error("Run not found");
   res.json({ ...r, config: JSON.parse(r.config), summary: JSON.parse(r.summary || "[]"), rows: JSON.parse(r.rows || "[]") });
+}));
+
+// ---- Google connection (Search Console) ----
+app.get("/api/google/status", auth, (req, res) => {
+  const c = google.configured() ? google.connection(req.user.id) : null;
+  res.json({ configured: google.configured(), connected: Boolean(c), account: c?.account || null, redirectUri: google.redirectUri() });
+});
+
+app.get("/api/google/connect", auth, (req, res) => {
+  if (!google.configured()) return res.status(400).send("Google is not configured: set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and SECRET_KEY on the server.");
+  res.redirect(google.authUrl(req.user.id));
+});
+
+app.get("/api/google/callback", auth, async (req, res) => {
+  try {
+    if (req.query.error) throw new Error(String(req.query.error));
+    await google.handleCallback({ code: String(req.query.code || ""), state: req.query.state, userId: req.user.id });
+    res.redirect("/dashboard.html?connected=google");
+  } catch (e) {
+    res.redirect(`/dashboard.html?connect_error=${encodeURIComponent(e.message)}`);
+  }
+});
+
+app.delete("/api/google", auth, wrap(async (req, res) => { await google.disconnect(req.user.id); res.json({ ok: true }); }));
+app.get("/api/google/sites", auth, wrap(async (req, res) => res.json(await google.sites(req.user.id))));
+app.get("/api/google/report", auth, wrap(async (req, res) => {
+  const days = Math.min(Math.max(Number(req.query.days) || 28, 7), 90);
+  res.json(await google.report(req.user.id, String(req.query.site || ""), String(req.query.kind || ""), days));
 }));
 
 // ---- page rewriter: drafts for Blitz "Change" verdicts, approved item by item ----

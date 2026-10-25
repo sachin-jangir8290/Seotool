@@ -47,6 +47,7 @@
         <div><b>02</b><h3>Check AI visibility</h3><p>Can ChatGPT, Claude and Perplexity read you?</p><button class="btn" data-go="geo">Check now</button></div>
         <div><b>03</b><h3>Create an agent</h3><p>Upload a CSV and get proposals to approve.</p><button class="btn" data-go="agents">New agent</button></div></div>
       </section>
+      <section class="sheet" id="conn-card"><h2>Connections</h2><p class="intro">Connect your accounts so agents read live data instead of CSV exports.</p><div id="conn-list"></div></section>
       <section class="sheet"><h2>Recent audits</h2><div id="audit-list"></div></section>
     </div>
 
@@ -171,6 +172,7 @@
       <h2 id="run-title"></h2>
       <p class="intro" id="run-cols"></p>
       <div class="tool">
+        <div id="gsc-import" class="tool inline" hidden><select id="gsc-site"></select><button type="button" class="btn ghost" id="gsc-btn">Import from Search Console</button></div>
         <input type="file" id="csv-file" accept=".csv,text/csv,text/plain">
         <textarea id="csv" rows="8" placeholder="…or paste CSV here"></textarea>
         <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="run-btn">Run agent</button><button class="btn ghost" id="sample-btn">Load sample data</button></div>
@@ -187,5 +189,6 @@
 <script src="citations.js"></script>
 <script src="schedules.js"></script>
 <script src="rewrite.js"></script>
+<script src="connections.js"></script>
 </body>
 </html>
