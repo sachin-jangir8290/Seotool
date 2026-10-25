@@ -43,14 +43,25 @@ else
   echo "    Keeping your existing .env"
 fi
 
+# Pick a free local port (another app may already use 3000). Kept in .env so re-runs reuse it.
+port_busy() { ss -ltn "( sport = :$1 )" 2>/dev/null | grep -q LISTEN; }
+PORT="$(grep -E '^HOST_PORT=' .env | cut -d= -f2 || true)"
+if [ -z "$PORT" ]; then
+  docker compose down >/dev/null 2>&1 || true
+  PORT=3000
+  while port_busy "$PORT"; do PORT=$((PORT + 1)); done
+  echo "HOST_PORT=$PORT" >> .env
+fi
+echo "    Using local port $PORT"
+
 echo "==> Starting Citeloop"
 docker compose up -d --build
-for i in $(seq 1 30); do curl -fsS http://127.0.0.1:3000/healthz >/dev/null 2>&1 && break; sleep 2; done
-curl -fsS http://127.0.0.1:3000/healthz >/dev/null || { echo "App did not start. See: docker compose logs"; exit 1; }
+for i in $(seq 1 30); do curl -fsS "http://127.0.0.1:$PORT/healthz" >/dev/null 2>&1 && break; sleep 2; done
+curl -fsS "http://127.0.0.1:$PORT/healthz" >/dev/null || { echo "App did not start. See: cd $DIR && docker compose logs"; exit 1; }
 
 if ss -ltnp 2>/dev/null | grep -E ':(80|443) ' | grep -vq caddy; then
   echo "==> Ports 80/443 are already used by another web server (nginx/Apache?)."
-  echo "    Citeloop is running on 127.0.0.1:3000 — add a reverse proxy for $DOMAIN to it in that server."
+  echo "    Citeloop is running on 127.0.0.1:$PORT — add a reverse proxy for $DOMAIN to it in that server."
   exit 0
 fi
 
@@ -61,7 +72,7 @@ if ! command -v caddy >/dev/null; then
   curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' > /etc/apt/sources.list.d/caddy-stable.list
   apt-get update -y && apt-get install -y caddy
 fi
-printf '%s {\n  reverse_proxy 127.0.0.1:3000\n}\n' "$DOMAIN" > /etc/caddy/Caddyfile
+printf '%s {\n  reverse_proxy 127.0.0.1:%s\n}\n' "$DOMAIN" "$PORT" > /etc/caddy/Caddyfile
 systemctl reload caddy || systemctl restart caddy
 command -v ufw >/dev/null && ufw status | grep -q active && { ufw allow 80; ufw allow 443; } || true
 
