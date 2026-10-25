@@ -34,7 +34,7 @@ The built-in scheduler runs inside the server, so the server must stay on 24/7 (
 ```bash
 git clone https://github.com/<you>/Seotool.git && cd Seotool
 cp .env.example .env        # fill in SECRET_KEY, PUBLIC_URL and any API keys
-docker compose up -d --build
+docker compose up -d --build   # app listens on 127.0.0.1:3000 only
 ```
 
 Put HTTPS in front with [Caddy](https://caddyserver.com) (automatic certificates):
