@@ -4,21 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Agent Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="hero">
+<nav class="nav">
+  <div class="wrap nav-in">
+    <a href="/" class="logo"><span class="logo-mark">S</span>SEOTool</a>
+    <div style="display:flex;gap:10px;align-items:center"><span class="badge" id="who">not signed in</span><a href="/" class="btn outline">Guide</a></div>
+  </div>
+</nav>
+<header class="page-head">
   <div class="wrap">
-    <div class="meta-row">
-      <a href="/" class="tag" style="color:#9fb0c8">■ ← back to the guide</a>
-      <span class="badge" id="who">not signed in</span>
-    </div>
-    <h1>Your agent <span class="accent">dashboard.</span></h1>
-    <p class="sub">Create agents, feed them data, review what they propose, approve or reject.</p>
+    <h1>Agent dashboard</h1>
+    <p>Create agents, feed them data, review what they propose, approve or reject.</p>
   </div>
 </header>
 
-<main class="wrap" style="padding-bottom:40px">
+<main class="wrap dash">
   <section class="sheet" id="auth-box" hidden>
     <h2>Sign in</h2>
     <p class="intro">Your agents, runs and checklists are saved to your account.</p>
@@ -27,11 +30,11 @@
       <input name="email" type="email" placeholder="Email" required>
       <input name="password" type="password" placeholder="Password (min 8 chars)" required>
       <div style="display:flex;gap:8px"><button class="btn" data-mode="login">Log in</button><button class="btn ghost" data-mode="signup">Create account</button></div>
-      <p id="auth-err" style="color:#c2410c;margin:0"></p>
+      <p id="auth-err" style="color:#d93a3a;margin:0"></p>
     </form>
   </section>
 
-  <div id="app" hidden style="display:grid;gap:20px">
+  <div id="app" hidden style="display:grid;gap:24px">
     <section class="sheet">
       <h2>New agent</h2>
       <p class="intro">Built-in agents analyse a CSV export. "Custom AI agent" uses Claude with your role and rules.</p>

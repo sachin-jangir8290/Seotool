@@ -97,9 +97,13 @@ const SHEETS = [
 
 function render() {
   $("#stats").innerHTML = DATA.stats.map(([n, l]) => `<span><b>${n}</b> ${l}</span>`).join("");
+  const icons = { google: "◎", meta: "◆", seo: "↗", geo: "✦" };
+  const teamSheet0 = SHEETS.findIndex((x) => x[0] === DATA.teams.google.title);
+  $("#svc").innerHTML = Object.entries(DATA.teams).map(([k, t], i) =>
+    `<a href="#s${teamSheet0 + i + 1}"><div class="ico">${icons[k]}</div><h3>${esc(t.title.replace(/^The | agent team$/g, ""))}</h3><p>${esc(t.agents.slice(0, 3).map((a) => a[0]).join(", "))} and more.</p><span>${t.agents.length} agents →</span></a>`).join("");
   $("#toc").innerHTML = SHEETS.map((s, i) => `<a href="#s${i + 1}">${i + 1}. ${esc(s[0])}</a>`).join("");
   $("#sheets").innerHTML = SHEETS.map(([title, intro, body, wide], i) =>
-    `<section class="sheet ${wide ? "wide" : ""}" id="s${i + 1}"><div class="num">${String(i + 1).padStart(2, "0")} / ${SHEETS.length}</div><h2>${esc(title)}</h2><p class="intro">${esc(intro)}</p>${body()}</section>`).join("");
+    `<section class="sheet ${wide ? "wide" : ""}" id="s${i + 1}"><div class="num">Sheet ${String(i + 1).padStart(2, "0")}</div><h2>${esc(title)}</h2><p class="intro">${esc(intro)}</p>${body()}</section>`).join("");
 
   // Ladder
   document.querySelectorAll(".ladder button").forEach((b) => b.addEventListener("click", () => {
