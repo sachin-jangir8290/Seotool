@@ -1,4 +1,4 @@
-# SEOTool — open-source agentic marketing
+# Citeloop — open-source agentic marketing
 
 Run **Google Ads, Meta Ads, SEO and AI search (GEO)** with a team of AI agents — free, self-hosted, and open source.
 

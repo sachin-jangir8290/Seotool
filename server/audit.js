@@ -24,7 +24,7 @@ async function checkUrl(raw) {
 
 // Follows redirects by hand so every hop goes through the same host check.
 async function get(url, hops = 5) {
-  const res = await fetch(url, { redirect: "manual", signal: AbortSignal.timeout(15000), headers: { "User-Agent": "SEOToolAudit/1.0" } });
+  const res = await fetch(url, { redirect: "manual", signal: AbortSignal.timeout(15000), headers: { "User-Agent": "CiteloopAudit/1.0" } });
   const loc = res.headers.get("location");
   if (res.status >= 300 && res.status < 400 && loc) {
     if (!hops) throw new Error("Too many redirects");

@@ -1,7 +1,7 @@
 {
-  "name": "seotool",
+  "name": "citeloop",
   "version": "1.0.0",
-  "description": "Open-source agentic marketing toolkit: AI agents, SEO audits, AI-search (GEO) visibility and fast Blitz judgments for Google Ads, Meta Ads and SEO.",
+  "description": "Citeloop \u2014 open-source agentic marketing toolkit: AI agents, SEO audits, AI-search (GEO) visibility and fast Blitz judgments for Google Ads, Meta Ads and SEO.",
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
@@ -21,7 +21,7 @@
     "agents",
     "open-source"
   ],
-  "author": "SEOTool contributors",
+  "author": "Citeloop contributors",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/sachin-jangir8290/Seotool/issues"

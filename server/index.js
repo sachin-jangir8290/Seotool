@@ -495,7 +495,7 @@ app.post("/api/alerts/read", auth, (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 if (require.main === module) {
-  app.listen(PORT, () => console.log(`SEOTool running on http://localhost:${PORT}`));
+  app.listen(PORT, () => console.log(`Citeloop running on http://localhost:${PORT}`));
   if (process.env.SCHEDULER !== "off") scheduler.start();
 }
 module.exports = app;

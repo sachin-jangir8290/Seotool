@@ -1,6 +1,6 @@
-# Deploying SEOTool
+# Deploying Citeloop
 
-SEOTool is one Node.js process with a SQLite file. Anything that runs a Docker container **and keeps a disk** works.
+Citeloop is one Node.js process with a SQLite file. Anything that runs a Docker container **and keeps a disk** works.
 The built-in scheduler runs inside the server, so the server must stay on 24/7 (no "sleep on idle" plans).
 
 | Option | Cost (approx.) | Effort |
