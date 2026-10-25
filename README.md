@@ -57,10 +57,15 @@ Copy `.env.example` to `.env` (or export the variables) to configure:
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth app for Search Console (see below) |
 | `SECRET_KEY` | Long random string; encrypts stored OAuth tokens |
 | `PUBLIC_URL` | Public address of your server, e.g. `https://seo.example.com` (used for the OAuth redirect) |
+| `ALLOW_SIGNUP=false` | Close registration after your own account exists |
 | `SMTP_URL` / `SMTP_FROM` | Email alerts, e.g. `smtps://user:pass@smtp.example.com` |
 | `SCHEDULER=off` | Disable the built-in scheduler (e.g. on extra replicas) |
 | `PLUGINS_DIR` | Extra plugin folder (default `./plugins`) |
 | `AUDIT_ALLOW_PRIVATE=1` | Let audits reach localhost/private IPs (development only) |
+
+## Deploy
+
+Render (Blueprint), Railway or any VPS with Docker — see **[DEPLOY.md](DEPLOY.md)**. Health check: `/healthz`.
 
 ## Connect Google (Search Console + GA4)
 

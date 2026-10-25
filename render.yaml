@@ -1,0 +1,28 @@
+# One-click deploy on Render: New → Blueprint → pick this repo.
+services:
+  - type: web
+    name: seotool
+    runtime: docker
+    plan: starter            # a persistent disk needs a paid plan
+    healthCheckPath: /healthz
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_PATH
+        value: /data/seotool.db
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PUBLIC_URL
+        sync: false          # set to your Render URL, e.g. https://seotool.onrender.com
+      - key: ALLOW_SIGNUP
+        value: "true"
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false

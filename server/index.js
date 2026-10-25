@@ -13,8 +13,33 @@ const rewriter = require("./rewriter");
 const google = require("./google");
 
 const app = express();
+// Behind Render/Railway/nginx the client IP and https come from X-Forwarded-* headers.
+if (process.env.TRUST_PROXY !== "0") app.set("trust proxy", 1);
+app.disable("x-powered-by");
+app.use((req, res, next) => {
+  res.set({
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  });
+  if (req.secure) res.set("Strict-Transport-Security", "max-age=15552000");
+  next();
+});
+app.get("/healthz", (_req, res) => res.json({ ok: true }));
 app.use(express.json({ limit: "5mb" }));
 app.use(express.static(path.join(__dirname, "..", "public")));
+
+// Simple in-memory limiter for auth endpoints: 10 attempts per IP per 15 minutes.
+const attempts = new Map();
+function authLimit(req, res, next) {
+  const now = Date.now(), key = req.ip;
+  const a = (attempts.get(key) || []).filter((t) => now - t < 15 * 60000);
+  if (a.length >= 10) return res.status(429).json({ error: "Too many attempts — try again in 15 minutes" });
+  a.push(now); attempts.set(key, a);
+  if (attempts.size > 10000) attempts.clear();
+  next();
+}
 
 // ---- auth helpers ----
 const hash = (pw, salt = crypto.randomBytes(16).toString("hex")) =>
@@ -45,7 +70,11 @@ const auth = (req, res, next) => (req.user ? next() : res.status(401).json({ err
 const wrap = (fn) => (req, res) => Promise.resolve(fn(req, res)).catch((e) => res.status(400).json({ error: e.message }));
 
 // ---- auth routes ----
-app.post("/api/signup", wrap((req, res) => {
+app.post("/api/signup", authLimit, wrap((req, res) => {
+  // ALLOW_SIGNUP=false closes registration once your own account exists (the very first account is always allowed).
+  if (process.env.ALLOW_SIGNUP === "false" && db.prepare("SELECT COUNT(*) n FROM users").get().n > 0) {
+    return res.status(403).json({ error: "Sign-up is closed on this server" });
+  }
   const { email, password, name } = req.body || {};
   if (!/^\S+@\S+\.\S+$/.test(email || "")) throw new Error("Valid email required");
   if ((password || "").length < 8) throw new Error("Password must be at least 8 characters");
@@ -55,7 +84,7 @@ app.post("/api/signup", wrap((req, res) => {
   res.json({ ok: true });
 }));
 
-app.post("/api/login", wrap((req, res) => {
+app.post("/api/login", authLimit, wrap((req, res) => {
   const { email, password } = req.body || {};
   const u = db.prepare("SELECT * FROM users WHERE email = ?").get(String(email || "").toLowerCase());
   if (!u || !verify(password || "", u.pass_hash)) return res.status(401).json({ error: "Wrong email or password" });
