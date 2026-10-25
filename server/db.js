@@ -22,6 +22,10 @@ db.exec(`
     id INTEGER PRIMARY KEY, agent_id INTEGER NOT NULL REFERENCES agents(id) ON DELETE CASCADE,
     status TEXT NOT NULL, summary TEXT, result TEXT, approved INTEGER DEFAULT 0,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP);
+  CREATE TABLE IF NOT EXISTS audits (
+    id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type TEXT NOT NULL, url TEXT NOT NULL, score INTEGER, result TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP);
 `);
 
 module.exports = db;

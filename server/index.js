@@ -4,6 +4,7 @@ const path = require("path");
 const db = require("./db");
 const { ANALYZERS, parseCSV } = require("./analyzers");
 const ai = require("./ai");
+const audit = require("./audit");
 
 const app = express();
 app.use(express.json({ limit: "5mb" }));
@@ -133,6 +134,60 @@ app.post("/api/runs/:id/approve", auth, wrap((req, res) => {
   if (!run) throw new Error("Run not found");
   db.prepare("UPDATE runs SET approved = ? WHERE id = ?").run(req.body?.approved === false ? -1 : 1, run.id);
   res.json({ ok: true });
+}));
+
+// ---- site audits (SEO + AI search readiness) ----
+app.post("/api/audits", auth, wrap(async (req, res) => {
+  const { url, type } = req.body || {};
+  if (!["seo", "geo"].includes(type)) throw new Error("type must be seo or geo");
+  const out = await (type === "seo" ? audit.seoAudit : audit.geoAudit)(String(url || ""));
+  const { lastInsertRowid } = db.prepare("INSERT INTO audits (user_id, type, url, score, result) VALUES (?, ?, ?, ?, ?)")
+    .run(req.user.id, type, out.url, out.score, JSON.stringify(out));
+  res.json({ id: Number(lastInsertRowid), ...out });
+}));
+
+app.get("/api/audits", auth, (req, res) => {
+  const rows = db.prepare("SELECT id, type, url, score, created_at FROM audits WHERE user_id = ? ORDER BY id DESC LIMIT 50").all(req.user.id);
+  res.json(rows);
+});
+
+app.get("/api/audits/:id", auth, wrap((req, res) => {
+  const a = db.prepare("SELECT * FROM audits WHERE id = ? AND user_id = ?").get(req.params.id, req.user.id);
+  if (!a) throw new Error("Audit not found");
+  res.json({ ...a, result: JSON.parse(a.result) });
+}));
+
+// ---- overview stats for the dashboard home ----
+app.get("/api/overview", auth, (req, res) => {
+  const one = (sql) => db.prepare(sql).get(req.user.id);
+  res.json({
+    agents: one("SELECT COUNT(*) n FROM agents WHERE user_id = ?").n,
+    runs: one("SELECT COUNT(*) n FROM runs r JOIN agents a ON a.id = r.agent_id WHERE a.user_id = ?").n,
+    pending: one("SELECT COUNT(*) n FROM runs r JOIN agents a ON a.id = r.agent_id WHERE a.user_id = ? AND r.approved = 0").n,
+    lastSeo: one("SELECT score, url FROM audits WHERE user_id = ? AND type = 'seo' ORDER BY id DESC LIMIT 1") || null,
+    lastGeo: one("SELECT score, url FROM audits WHERE user_id = ? AND type = 'geo' ORDER BY id DESC LIMIT 1") || null,
+  });
+});
+
+// ---- CSV export of a run ----
+app.get("/api/runs/:id/export.csv", auth, wrap((req, res) => {
+  const run = db.prepare("SELECT r.* FROM runs r JOIN agents a ON a.id = r.agent_id WHERE r.id = ? AND a.user_id = ?").get(req.params.id, req.user.id);
+  if (!run) throw new Error("Run not found");
+  const r = JSON.parse(run.result || "{}");
+  const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const csv = r.rows ? [r.columns.map(cell).join(","), ...r.rows.map((row) => r.columns.map((c) => cell(row[c])).join(","))].join("\n") : cell(r.text);
+  res.type("text/csv").attachment(`run-${run.id}.csv`).send(csv);
+}));
+
+// ---- AI assistant chat ----
+app.post("/api/chat", auth, wrap(async (req, res) => {
+  const history = (req.body?.messages || []).filter((m) => ["user", "assistant"].includes(m.role) && m.content).slice(-20);
+  if (!history.length || history.at(-1).role !== "user") throw new Error("Send a message");
+  const runs = db.prepare(`SELECT a.name, r.summary, r.created_at FROM runs r JOIN agents a ON a.id = r.agent_id
+    WHERE a.user_id = ? ORDER BY r.id DESC LIMIT 10`).all(req.user.id);
+  const audits = db.prepare("SELECT type, url, score, created_at FROM audits WHERE user_id = ? ORDER BY id DESC LIMIT 5").all(req.user.id);
+  const context = [...runs.map((r) => `Run ${r.created_at} — ${r.name}: ${r.summary}`), ...audits.map((a) => `${a.type.toUpperCase()} audit ${a.created_at} — ${a.url}: ${a.score}/100`)].join("\n");
+  res.json({ reply: await ai.chat(history, context) });
 }));
 
 const PORT = process.env.PORT || 3000;

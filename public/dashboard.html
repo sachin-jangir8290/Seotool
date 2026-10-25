@@ -11,7 +11,7 @@
 <nav class="nav">
   <div class="wrap nav-in">
     <a href="/" class="logo"><span class="logo-mark">S</span>SEOTool</a>
-    <div style="display:flex;gap:10px;align-items:center"><span class="badge" id="who">not signed in</span><a href="/" class="btn outline">Guide</a></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="badge" id="who">not signed in</span><a href="/" class="btn outline">Guide</a><button class="btn ghost" id="logout">Log out</button></div>
   </div>
 </nav>
 <header class="page-head">
@@ -34,7 +34,42 @@
     </form>
   </section>
 
-  <div id="app" hidden style="display:grid;gap:24px">
+  <div id="app" hidden>
+    <nav class="tabs" id="tabs">
+      <button data-tab="overview" class="on">Overview</button><button data-tab="agents">Agents</button>
+      <button data-tab="seo">SEO audit</button><button data-tab="geo">AI visibility</button><button data-tab="chat">Assistant</button>
+    </nav>
+
+    <div class="tab" data-pane="overview">
+      <div class="kpi-row" id="kpis"></div>
+      <section class="sheet"><h2>Quick start</h2><p class="intro">Three things to do first.</p>
+        <div class="steps mini"><div><b>01</b><h3>Audit your site</h3><p>Get an SEO score and fix list.</p><button class="btn" data-go="seo">Run SEO audit</button></div>
+        <div><b>02</b><h3>Check AI visibility</h3><p>Can ChatGPT, Claude and Perplexity read you?</p><button class="btn" data-go="geo">Check now</button></div>
+        <div><b>03</b><h3>Create an agent</h3><p>Upload a CSV and get proposals to approve.</p><button class="btn" data-go="agents">New agent</button></div></div>
+      </section>
+      <section class="sheet"><h2>Recent audits</h2><div id="audit-list"></div></section>
+    </div>
+
+    <div class="tab" data-pane="seo" hidden>
+      <section class="sheet"><h2>SEO site audit</h2><p class="intro">14 on-page checks: title, meta, headings, alt text, speed, indexability and more.</p>
+        <form class="tool inline" data-audit="seo"><input name="url" placeholder="https://yourwebsite.com" required><button class="btn">Audit</button></form>
+        <div class="audit-out"></div></section>
+    </div>
+
+    <div class="tab" data-pane="geo" hidden>
+      <section class="sheet"><h2>AI search visibility (GEO)</h2><p class="intro">Checks AI crawler access in robots.txt, llms.txt, structured data and answer-friendly content.</p>
+        <form class="tool inline" data-audit="geo"><input name="url" placeholder="https://yourwebsite.com" required><button class="btn">Check</button></form>
+        <div class="audit-out"></div></section>
+    </div>
+
+    <div class="tab" data-pane="chat" hidden>
+      <section class="sheet"><h2>Marketing assistant</h2><p class="intro">Ask about your campaigns, audits and agent results. It reads your latest runs and audits.</p>
+        <div id="chat-log" class="chat-log"></div>
+        <form class="tool inline" id="chat-form"><input name="q" placeholder="e.g. Which fix from my last audit should I do first?" required autocomplete="off"><button class="btn">Send</button></form>
+      </section>
+    </div>
+
+    <div class="tab" data-pane="agents" hidden style="display:grid;gap:24px">
     <section class="sheet">
       <h2>New agent</h2>
       <p class="intro">Built-in agents analyse a CSV export. "Custom AI agent" uses Claude with your role and rules.</p>
@@ -50,7 +85,7 @@
 
     <section class="sheet">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <h2>Your agents</h2><button class="btn ghost" id="logout">Log out</button>
+        <h2>Your agents</h2>
       </div>
       <div id="agents"></div>
     </section>
@@ -67,6 +102,7 @@
       <h3 style="margin-top:20px">Run history</h3>
       <div id="history"></div>
     </section>
+    </div>
   </div>
 </main>
 <script src="dashboard.js"></script>

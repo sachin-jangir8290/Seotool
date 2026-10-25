@@ -27,4 +27,24 @@ async function runAI(agent, data) {
   return { summary: text.split("\n").find((l) => l.trim()) || "Done", text };
 }
 
-module.exports = { runAI, enabled };
+// Chat assistant grounded in the user's own recent agent runs and audits.
+async function chat(history, context) {
+  if (!enabled()) throw new Error("The assistant needs ANTHROPIC_API_KEY set on the server");
+  client ??= new Anthropic();
+  const response = await client.beta.messages.create({
+    model: process.env.CLAUDE_MODEL || "claude-opus-5-5",
+    max_tokens: 16000,
+    output_config: { effort: "low" },
+    betas: ["server-side-fallback-2026-07-01"],
+    fallbacks: "default",
+    system:
+      "You are a senior performance marketer helping with Google Ads, Meta Ads, SEO and AI search (GEO). " +
+      "Use the user's account context below when relevant, be specific and practical, and keep answers short.\n\n" +
+      `ACCOUNT CONTEXT:\n${context || "No runs or audits yet."}`,
+    messages: history,
+  });
+  if (response.stop_reason === "refusal") throw new Error("The model declined this request");
+  return response.content.filter((b) => b.type === "text").map((b) => b.text).join("\n");
+}
+
+module.exports = { runAI, chat, enabled };

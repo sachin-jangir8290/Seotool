@@ -26,7 +26,74 @@ async function boot() {
   $("#kind").innerHTML = analyzers.map((a) => `<option value="${a.kind}">${esc(a.label)}</option>`).join("") +
     `<option value="ai" ${aiEnabled ? "" : "disabled"}>Custom AI agent (Claude)${aiEnabled ? "" : " — set ANTHROPIC_API_KEY"}</option>`;
   loadAgents();
+  loadOverview();
+  if (!aiEnabled) $("#chat-log").innerHTML = '<p class="intro">Set ANTHROPIC_API_KEY on the server to enable the assistant.</p>';
 }
+
+// ---- tabs ----
+function showTab(name) {
+  document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === name));
+  document.querySelectorAll(".tab").forEach((t) => (t.hidden = t.dataset.pane !== name));
+  if (name === "overview") loadOverview();
+}
+$("#tabs").onclick = (e) => e.target.dataset.tab && showTab(e.target.dataset.tab);
+document.addEventListener("click", (e) => e.target.dataset.go && showTab(e.target.dataset.go));
+
+// ---- overview ----
+async function loadOverview() {
+  const o = await api("/api/overview");
+  const tile = (label, v, sub = "") => `<div class="kpi"><small>${label}</small><b>${v}</b><span>${esc(sub)}</span></div>`;
+  $("#kpis").innerHTML = tile("SEO score", o.lastSeo ? o.lastSeo.score : "—", o.lastSeo?.url || "No audit yet") +
+    tile("AI visibility", o.lastGeo ? o.lastGeo.score : "—", o.lastGeo?.url || "No check yet") +
+    tile("Agents", o.agents) + tile("Agent runs", o.runs) + tile("Pending approvals", o.pending);
+  const list = await api("/api/audits");
+  $("#audit-list").innerHTML = list.length
+    ? `<div class="scroll"><table><thead><tr><th>Type</th><th>URL</th><th>Score</th><th>Date</th><th></th></tr></thead><tbody>${list.map((a) =>
+        `<tr><td>${a.type === "seo" ? "SEO" : "AI visibility"}</td><td>${esc(a.url)}</td><td>${scoreBadge(a.score)}</td><td>${esc(a.created_at)}</td><td><button class="btn ghost" data-audit-id="${a.id}">View</button></td></tr>`).join("")}</tbody></table></div>`
+    : "<p>No audits yet.</p>";
+}
+$("#audit-list").onclick = async (e) => {
+  const id = e.target.dataset.auditId;
+  if (!id) return;
+  const a = await api(`/api/audits/${id}`);
+  showTab(a.type);
+  document.querySelector(`[data-pane="${a.type}"] .audit-out`).innerHTML = auditView(a.result);
+};
+
+// ---- audits ----
+const scoreBadge = (s) => `<span class="pill ${s >= 80 ? "good" : s >= 50 ? "mid" : "bad"}">${s}/100</span>`;
+const ICON = { pass: "✓", warn: "!", fail: "✕" };
+function auditView(r) {
+  return `<div class="score-ring" style="--s:${r.score}"><b>${r.score}</b><small>score</small></div>
+    <p class="intro" style="text-align:center">${esc(r.url)}</p>
+    ${r.bots ? `<div class="bots">${r.bots.map((b) => `<span class="${b.allowed ? "ok" : "no"}">${b.allowed ? "✓" : "✕"} ${esc(b.bot)}</span>`).join("")}</div>` : ""}
+    <div class="checks">${r.checks.map((c) => `<div class="check ${c.status}"><i>${ICON[c.status]}</i><div><b>${esc(c.name)}</b><small>${esc(c.detail)}</small></div></div>`).join("")}</div>`;
+}
+document.querySelectorAll("[data-audit]").forEach((f) => (f.onsubmit = async (e) => {
+  e.preventDefault();
+  const out = f.parentElement.querySelector(".audit-out");
+  out.innerHTML = "<p>Auditing… this can take up to 15 seconds.</p>";
+  try { out.innerHTML = auditView(await api("/api/audits", { method: "POST", body: { type: f.dataset.audit, url: f.url.value } })); }
+  catch (err) { out.innerHTML = `<p style="color:#d93a3a">${esc(err.message)}</p>`; }
+}));
+
+// ---- assistant chat ----
+const chatHistory = [];
+$("#chat-form").onsubmit = async (e) => {
+  e.preventDefault();
+  const q = e.target.q.value.trim();
+  if (!q) return;
+  e.target.q.value = "";
+  chatHistory.push({ role: "user", content: q });
+  const draw = (pending) => {
+    $("#chat-log").innerHTML = chatHistory.map((m) => `<div class="msg ${m.role}">${esc(m.content)}</div>`).join("") + (pending ? '<div class="msg assistant">…</div>' : "");
+    $("#chat-log").scrollTop = 1e9;
+  };
+  draw(true);
+  try { chatHistory.push({ role: "assistant", content: (await api("/api/chat", { method: "POST", body: { messages: chatHistory } })).reply }); }
+  catch (err) { chatHistory.pop(); $("#chat-log").insertAdjacentHTML("beforeend", `<p style="color:#d93a3a">${esc(err.message)}</p>`); return; }
+  draw(false);
+};
 
 async function loadAgents() {
   const list = await api("/api/agents");
@@ -60,7 +127,7 @@ async function loadHistory() {
   $("#history").innerHTML = runs.length
     ? runs.map((r) => `<details style="border-top:1px solid var(--line);padding:8px 0"><summary>#${r.id} · ${esc(r.created_at)} · ${badge(r.approved)} — ${esc(r.summary)}</summary>
         ${resultTable(r.result)}
-        ${r.approved ? "" : `<div style="margin-top:8px;display:flex;gap:8px"><button class="btn" data-ok="${r.id}">Approve</button><button class="btn ghost" data-no="${r.id}">Reject</button></div>`}</details>`).join("")
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">${r.approved ? "" : `<button class="btn" data-ok="${r.id}">Approve</button><button class="btn ghost" data-no="${r.id}">Reject</button>`}<a class="btn ghost" href="/api/runs/${r.id}/export.csv">Export CSV</a></div></details>`).join("")
     : "<p>No runs yet.</p>";
 }
 
