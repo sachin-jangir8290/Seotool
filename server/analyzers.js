@@ -89,4 +89,27 @@ const ANALYZERS = {
   },
 };
 
-module.exports = { ANALYZERS, parseCSV };
+// Plugins: every .js file in /plugins (or PLUGINS_DIR) can add analyzers.
+// A plugin exports { analyzers: { "kind": { label, columns, sample, run(rows, opts) } } }.
+function loadPlugins(dir = process.env.PLUGINS_DIR || require("path").join(__dirname, "..", "plugins")) {
+  const fs = require("fs"), path = require("path");
+  if (!fs.existsSync(dir)) return [];
+  const loaded = [];
+  for (const file of fs.readdirSync(dir).filter((f) => f.endsWith(".js")).sort()) {
+    try {
+      const plugin = require(path.join(dir, file));
+      for (const [kind, a] of Object.entries(plugin.analyzers || {})) {
+        if (ANALYZERS[kind]) throw new Error(`analyzer "${kind}" already exists`);
+        if (typeof a.run !== "function" || !a.label) throw new Error(`analyzer "${kind}" needs label and run()`);
+        ANALYZERS[kind] = a;
+        loaded.push(kind);
+      }
+    } catch (e) {
+      console.warn(`Plugin ${file} skipped: ${e.message}`);
+    }
+  }
+  return loaded;
+}
+// Export before loading so plugins can require these helpers.
+module.exports = { ANALYZERS, parseCSV, num, need, loadPlugins };
+loadPlugins();
