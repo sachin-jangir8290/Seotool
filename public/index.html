@@ -3,19 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SEOTool — Agentic Marketing</title>
+<title>Citeloop — Agentic Marketing</title>
 <meta name="description" content="Run Google Ads, Meta Ads, SEO and AI search with a team of AI agents.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <nav class="nav">
   <div class="wrap nav-in">
-    <a href="/" class="logo"><span class="logo-mark">S</span>SEOTool</a>
+    <a href="/" class="logo"><img class="logo-img" src="logo-mark.svg" alt=""><span>Citeloop<small class="by">by Openwise</small></span></a>
     <input type="checkbox" id="nav-t" hidden><label for="nav-t" class="burger">☰</label>
     <div class="links">
-      <a href="#services">Services</a><a href="#how">How it works</a><a href="#guide">Guide</a><a href="#pricing">Pricing</a>
+      <a href="#services">Services</a><a href="#how">How it works</a><a href="#faq">FAQ</a><a href="#guide">Guide</a><a href="#pricing">Pricing</a>
       <a href="dashboard.html" class="btn">Dashboard</a>
     </div>
   </div>
@@ -45,6 +46,10 @@
   </div>
 </header>
 
+<section class="trusted">
+  <div class="wrap"><small>Built for</small><span>Agencies</span><span>E-commerce</span><span>SaaS</span><span>Local business</span><span>Publishers</span><span>Freelancers</span></div>
+</section>
+
 <section class="section" id="services">
   <div class="wrap">
     <div class="sec-head"><span class="eyebrow">Our services</span><h2>Four agent teams, one dashboard</h2><p>Each team has 10 specialised agents with one job, one data source and one output.</p></div>
@@ -60,6 +65,27 @@
       <div><b>02</b><h3>Pick an agent</h3><p>Use a built-in agent or write your own role and rules.</p></div>
       <div><b>03</b><h3>Review proposals</h3><p>Agents explain every change they suggest.</p></div>
       <div><b>04</b><h3>Approve & log</h3><p>Nothing goes live without you. Every run is logged.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap feature">
+    <div>
+      <span class="eyebrow">One dashboard</span>
+      <h2 style="font-size:clamp(26px,3.5vw,38px);margin:14px 0 8px">See every channel move, then fix what matters</h2>
+      <p class="lead">Audit scores, AI-citation rates, keyword positions and agent runs in one place — with an approval queue so nothing changes without you.</p>
+      <ul>
+        <li>SEO and AI-search (GEO) audits with a clear fix list</li>
+        <li>Track how often ChatGPT, Claude, Gemini and Perplexity name you</li>
+        <li>Keyword opportunities from your own Search Console data</li>
+        <li>Scheduled runs with Slack, Discord and email alerts</li>
+      </ul>
+      <a href="dashboard.html" class="btn">Open the dashboard</a>
+    </div>
+    <div class="mock" aria-hidden="true">
+      <div class="mrow"><div>SEO score<b>86</b></div><div>AI visibility<b>72</b></div><div>Citation rate<b>41%</b></div></div>
+      <div class="mbars"><i style="height:40%"></i><i style="height:55%"></i><i style="height:48%"></i><i style="height:70%"></i><i style="height:62%"></i><i style="height:80%"></i><i style="height:74%"></i><i style="height:92%"></i></div>
     </div>
   </div>
 </section>
@@ -87,17 +113,41 @@
   </div>
 </section>
 
+<section class="section">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Use cases</span><h2>What teams use it for</h2></div>
+    <div class="quotes">
+      <div class="quote"><p><b>Agencies</b> run weekly audits for every client on a schedule and send the approved fixes as ready-to-paste HTML.</p><div class="who"><span class="av">A</span><div>Client reporting<small>Schedules · Rewriter</small></div></div></div>
+      <div class="quote"><p><b>E-commerce teams</b> find page-2 keywords and pages losing clicks, then fix titles and FAQs before the next sale.</p><div class="who"><span class="av">E</span><div>Organic growth<small>Keywords · Blitz</small></div></div></div>
+      <div class="quote"><p><b>SaaS marketers</b> track whether AI assistants recommend them or a competitor, and which pages to rewrite to get cited.</p><div class="who"><span class="av">S</span><div>AI search (GEO)<small>AI Citations · AI visibility</small></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="faq">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">FAQ</span><h2>Questions, answered</h2></div>
+    <div class="faq">
+      <details><summary>Is it really free and open source?</summary><p>Yes — MIT licensed. Self-host it with Docker or one click on Render. You only pay for any AI API keys you choose to add.</p></details>
+      <details><summary>Do I need API keys to start?</summary><p>No. SEO audits, AI visibility checks, Blitz and the built-in agents work without any keys. Keys unlock AI citation tracking, AI rewrites and the assistant.</p></details>
+      <details><summary>Will the agents change my site or ads on their own?</summary><p>No. Agents only propose changes. Everything waits in an approval queue, and every run is logged.</p></details>
+      <details><summary>Which data sources can I connect?</summary><p>Google Search Console and GA4 today (read-only OAuth). Google Ads and Meta Ads are on the roadmap; until then, CSV exports work with every agent.</p></details>
+    </div>
+  </div>
+</section>
+
 <section class="cta-band">
   <div class="wrap cta-in"><div><h2>Ready to put your marketing on autopilot?</h2><p>Create your first agent in under 5 minutes.</p></div><a href="dashboard.html" class="btn light">Open dashboard →</a></div>
 </section>
 
 <footer class="footer">
   <div class="wrap foot-in">
-    <div><a href="/" class="logo light"><span class="logo-mark">S</span>SEOTool</a><p>AI agents for Google Ads, Meta Ads, SEO and AI search.</p></div>
+    <div><a href="/" class="logo light"><img class="logo-img" src="logo-mark-light.svg" alt="">Citeloop</a><p>AI agents for Google Ads, Meta Ads, SEO and AI search.</p>
+      <a class="by-ow" href="https://openwise.tech" target="_blank" rel="noopener"><img src="openwise-mark.svg" alt="" width="22" height="22"> A product of <b>Openwise</b></a></div>
     <div><h4>Product</h4><a href="dashboard.html">Dashboard</a><a href="#pricing">Pricing</a></div>
     <div><h4>Resources</h4><a href="#guide">Guide</a><a href="#" onclick="window.print();return false">Print guide</a></div>
   </div>
-  <div class="wrap copy">© 2026 SEOTool. All rights reserved.</div>
+  <div class="wrap copy">© 2026 Openwise. Citeloop is a product of <a href="https://openwise.tech" target="_blank" rel="noopener">Openwise</a>.</div>
 </footer>
 
 <script src="data.js"></script>

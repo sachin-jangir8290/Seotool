@@ -1,4 +1,4 @@
-# Contributing to SEOTool
+# Contributing to Citeloop
 
 Thanks for helping! Every new agent makes the tool better for everyone.
 

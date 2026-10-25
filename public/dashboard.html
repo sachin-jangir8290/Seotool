@@ -3,22 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Agent Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Citeloop Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<nav class="nav">
-  <div class="wrap nav-in">
-    <a href="/" class="logo"><span class="logo-mark">S</span>SEOTool</a>
-    <div style="display:flex;gap:10px;align-items:center"><span class="badge" id="who">not signed in</span><a href="/" class="btn outline">Guide</a><button class="btn ghost" id="logout">Log out</button></div>
-  </div>
-</nav>
-<header class="page-head">
-  <div class="wrap">
-    <h1>Agent dashboard</h1>
-    <p>Create agents, feed them data, review what they propose, approve or reject.</p>
-  </div>
+<div class="shell">
+<aside class="side">
+  <a href="/" class="logo"><img class="logo-img" src="logo-mark-light.svg" alt=""><span>Citeloop<small class="by">by Openwise</small></span></a>
+  <nav class="tabs" id="tabs">
+      <button data-tab="overview" class="on"><i>▦</i>Overview</button><button data-tab="agents"><i>◎</i>Agents</button>
+      
+      <small class="side-group">Audits</small><button data-tab="seo"><i>⌕</i>SEO audit</button><button data-tab="geo"><i>◈</i>AI visibility</button><button data-tab="blitz"><i>⚡</i>Blitz</button><button data-tab="cite"><i>❝</i>AI Citations</button>
+      <small class="side-group">Optimise</small><button data-tab="rewrite"><i>✎</i>Rewriter</button><button data-tab="kw"><i>#</i>Keywords</button>
+      <small class="side-group">Automate</small><button data-tab="sched"><i>◷</i>Schedules <span class="badge-n" id="alert-n" hidden></span></button><button data-tab="chat"><i>✉</i>Assistant</button>
+    </nav>
+  <div class="side-foot"><a href="/" class="side-link">← Website & guide</a><a class="side-link by-ow" href="https://openwise.tech" target="_blank" rel="noopener"><img src="openwise-mark.svg" alt="" width="18" height="18"> Openwise</a></div>
+</aside>
+<div class="main-col">
+<header class="topbar">
+  <button class="side-toggle" type="button" aria-label="Menu">☰</button>
+  <div class="top-title"><h1 id="page-title">Overview</h1><p id="page-sub">Your SEO, AI search and ads performance at a glance.</p></div>
+  <div class="top-actions"><span class="badge" id="who">not signed in</span><button class="btn ghost" id="logout">Log out</button></div>
 </header>
 
 <main class="wrap dash">
@@ -35,13 +42,16 @@
   </section>
 
   <div id="app" hidden>
-    <nav class="tabs" id="tabs">
-      <button data-tab="overview" class="on">Overview</button><button data-tab="agents">Agents</button>
-      <button data-tab="seo">SEO audit</button><button data-tab="geo">AI visibility</button><button data-tab="blitz">⚡ Blitz</button><button data-tab="cite">AI Citations</button><button data-tab="rewrite">✎ Rewriter</button><button data-tab="kw">Keywords</button><button data-tab="sched">Schedules <span class="badge-n" id="alert-n" hidden></span></button><button data-tab="chat">Assistant</button>
-    </nav>
 
     <div class="tab" data-pane="overview">
       <div class="kpi-row" id="kpis"></div>
+      <div class="chart-grid">
+        <section class="card-c span2"><header><h3>Audit scores</h3><p>Last 30 days · SEO and AI visibility</p></header><div class="chart-box"><canvas id="ch-scores" aria-label="Line chart of SEO and AI visibility audit scores over the last 30 days"></canvas></div></section>
+        <section class="card-c"><header><h3>Approval queue</h3><p>All agent runs</p></header><div class="chart-box"><canvas id="ch-approvals" aria-label="Donut chart of approved, rejected and pending agent runs"></canvas></div></section>
+        <section class="card-c"><header><h3>Agent runs</h3><p>Last 14 days</p></header><div class="chart-box"><canvas id="ch-runs" aria-label="Bar chart of agent runs per day"></canvas></div></section>
+        <section class="card-c"><header><h3>AI citation rate</h3><p>Latest tracking run · % of answers naming you</p></header><div class="chart-box"><canvas id="ch-cite" aria-label="Bar chart of citation rate by AI engine"></canvas></div></section>
+        <section class="card-c"><header><h3>Keyword positions</h3><p>Tracked keywords by ranking band</p></header><div class="chart-box"><canvas id="ch-ranks" aria-label="Bar chart of tracked keywords by position band"></canvas></div></section>
+      </div>
       <section class="sheet"><h2>Quick start</h2><p class="intro">Three things to do first.</p>
         <div class="steps mini"><div><b>01</b><h3>Audit your site</h3><p>Get an SEO score and fix list.</p><button class="btn" data-go="seo">Run SEO audit</button></div>
         <div><b>02</b><h3>Check AI visibility</h3><p>Can ChatGPT, Claude and Perplexity read you?</p><button class="btn" data-go="geo">Check now</button></div>
@@ -202,7 +212,11 @@
     </div>
   </div>
 </main>
+</div>
+</div>
+<script src="/vendor/chart.js"></script>
 <script src="dashboard.js"></script>
+<script src="charts.js"></script>
 <script src="blitz.js"></script>
 <script src="citations.js"></script>
 <script src="schedules.js"></script>

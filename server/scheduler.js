@@ -76,15 +76,15 @@ let transport;
 async function sendEmail(to, subject, text) {
   if (!process.env.SMTP_URL) return;
   transport ??= require("nodemailer").createTransport(process.env.SMTP_URL);
-  await transport.sendMail({ from: process.env.SMTP_FROM || "SEOTool <alerts@localhost>", to, subject, text });
+  await transport.sendMail({ from: process.env.SMTP_FROM || "Citeloop <alerts@localhost>", to, subject, text });
 }
 
 async function notify(s, level, message) {
   db.prepare("INSERT INTO alerts (user_id, schedule_id, level, message) VALUES (?, ?, ?, ?)").run(s.user_id, s.id, level, message);
-  const text = `[SEOTool] ${s.name}: ${message}`;
+  const text = `[Citeloop] ${s.name}: ${message}`;
   const jobs = [];
   if (s.webhook) jobs.push(sendWebhook(s.webhook, text));
-  if (s.email) jobs.push(sendEmail(s.email, `SEOTool alert: ${s.name}`, text));
+  if (s.email) jobs.push(sendEmail(s.email, `Citeloop alert: ${s.name}`, text));
   for (const r of await Promise.allSettled(jobs)) if (r.status === "rejected") console.warn(`Alert delivery failed: ${r.reason.message}`);
 }
 

@@ -73,7 +73,7 @@ async function handleCallback({ code, state, userId }) {
   db.prepare("DELETE FROM oauth_states WHERE state = ?").run(String(state || ""));
   if (!row || row.expires_at < Date.now() || row.user_id !== userId) throw new Error("Login link expired or invalid — try connecting again");
   const t = await tokenRequest({ code, grant_type: "authorization_code", redirect_uri: redirectUri() });
-  if (!t.refresh_token) throw new Error("Google did not return a refresh token — remove SEOTool from your Google account permissions and connect again");
+  if (!t.refresh_token) throw new Error("Google did not return a refresh token — remove Citeloop from your Google account permissions and connect again");
   const tokens = { access_token: t.access_token, refresh_token: t.refresh_token, expires_at: Date.now() + (t.expires_in - 60) * 1000, scope: t.scope || "" };
   db.prepare(`INSERT INTO connections (user_id, provider, account, tokens) VALUES (?, 'google', ?, ?)
     ON CONFLICT(user_id, provider) DO UPDATE SET account = excluded.account, tokens = excluded.tokens`).run(userId, emailFromIdToken(t.id_token || ""), seal(tokens));
