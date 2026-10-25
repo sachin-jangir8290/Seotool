@@ -1,5 +1,7 @@
 # Citeloop — open-source agentic marketing
 
+*A product of [Openwise](https://openwise.tech).*
+
 Run **Google Ads, Meta Ads, SEO and AI search (GEO)** with a team of AI agents — free, self-hosted, and open source.
 
 ![Dashboard](screenshots/14-overview.png)

@@ -423,3 +423,13 @@ h1 { font-weight: 800; }
 
 .logo-img { width: 34px; height: 34px; flex: none; }
 .side .logo-img { width: 32px; height: 32px; }
+/* "by Openwise" endorsement */
+.logo span { display: flex; flex-direction: column; line-height: 1.05; }
+.logo .by { font-size: 11px; font-weight: 600; color: #1f7a45; letter-spacing: .01em; }
+.side .logo .by, .logo.light .by { color: #3ddc84; }
+.by-ow { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; text-decoration: none; font-size: 13px; }
+.footer .by-ow { color: #b9b6d9; } .footer .by-ow b { color: #fff; }
+.side-foot { display: flex; flex-direction: column; gap: 10px; }
+.side-foot .by-ow { margin-top: 0; }
+.copy a { color: #fff; }
+.footer .copy a { display: inline; padding: 0; }
