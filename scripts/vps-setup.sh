@@ -44,7 +44,13 @@ else
 fi
 
 # Pick a free local port (another app may already use 3000). Kept in .env so re-runs reuse it.
-port_busy() { ss -ltn "( sport = :$1 )" 2>/dev/null | grep -q LISTEN; }
+# A port counts as busy if anything listens on it, or another Docker container publishes it
+# (Docker can forward ports without a visible listener).
+port_busy() {
+  (exec 3<>"/dev/tcp/127.0.0.1/$1") 2>/dev/null && return 0
+  docker ps --format '{{.Ports}}' 2>/dev/null | grep -qE "[:.]$1->" && return 0
+  return 1
+}
 PORT="$(grep -E '^HOST_PORT=' .env | cut -d= -f2 || true)"
 if [ -z "$PORT" ]; then
   docker compose down >/dev/null 2>&1 || true
@@ -55,7 +61,14 @@ fi
 echo "    Using local port $PORT"
 
 echo "==> Starting Citeloop"
-docker compose up -d --build
+if ! docker compose up -d --build; then
+  echo "    Port $PORT could not be used; trying the next free port"
+  docker compose down >/dev/null 2>&1 || true
+  PORT=$((PORT + 1)); while port_busy "$PORT"; do PORT=$((PORT + 1)); done
+  sed -i '/^HOST_PORT=/d' .env && echo "HOST_PORT=$PORT" >> .env
+  echo "    Using local port $PORT"
+  docker compose up -d
+fi
 for i in $(seq 1 30); do curl -fsS "http://127.0.0.1:$PORT/healthz" >/dev/null 2>&1 && break; sleep 2; done
 curl -fsS "http://127.0.0.1:$PORT/healthz" >/dev/null || { echo "App did not start. See: cd $DIR && docker compose logs"; exit 1; }
 
