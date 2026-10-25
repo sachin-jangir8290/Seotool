@@ -46,7 +46,7 @@ async function loadOverview() {
   $("#kpis").innerHTML = tile("SEO score", o.lastSeo ? o.lastSeo.score : "—", o.lastSeo?.url || "No audit yet") +
     tile("AI visibility", o.lastGeo ? o.lastGeo.score : "—", o.lastGeo?.url || "No check yet") +
     tile("Agents", o.agents) + tile("Agent runs", o.runs) + tile("Pending approvals", o.pending);
-  const list = await api("/api/audits");
+  const list = (await api("/api/audits")).slice(0, 8);
   $("#audit-list").innerHTML = list.length
     ? `<div class="scroll"><table><thead><tr><th>Type</th><th>URL</th><th>Score</th><th>Date</th><th></th></tr></thead><tbody>${list.map((a) =>
         `<tr><td>${a.type === "seo" ? "SEO" : "AI visibility"}</td><td>${esc(a.url)}</td><td>${scoreBadge(a.score)}</td><td>${esc(a.created_at)}</td><td><button class="btn ghost" data-audit-id="${a.id}">View</button></td></tr>`).join("")}</tbody></table></div>`

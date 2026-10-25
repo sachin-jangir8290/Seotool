@@ -6,7 +6,7 @@
 <title>SEOTool — Agentic Marketing</title>
 <meta name="description" content="Run Google Ads, Meta Ads, SEO and AI search with a team of AI agents.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -15,7 +15,7 @@
     <a href="/" class="logo"><span class="logo-mark">S</span>SEOTool</a>
     <input type="checkbox" id="nav-t" hidden><label for="nav-t" class="burger">☰</label>
     <div class="links">
-      <a href="#services">Services</a><a href="#how">How it works</a><a href="#guide">Guide</a><a href="#pricing">Pricing</a>
+      <a href="#services">Services</a><a href="#how">How it works</a><a href="#faq">FAQ</a><a href="#guide">Guide</a><a href="#pricing">Pricing</a>
       <a href="dashboard.html" class="btn">Dashboard</a>
     </div>
   </div>
@@ -31,19 +31,23 @@
       <div class="stats" id="stats"></div>
     </div>
     <svg class="hero-art" viewBox="0 0 480 400" aria-hidden="true">
-      <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#111111"/><stop offset="1" stop-color="#3a3a3a"/></linearGradient></defs>
+      <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#6a3df5"/><stop offset="1" stop-color="#22b8f0"/></linearGradient></defs>
       <circle cx="250" cy="200" r="170" fill="url(#g)" opacity=".12"/>
-      <rect x="70" y="70" width="340" height="230" rx="0" fill="#fff" stroke="#111" stroke-width="1.5"/>
-      <rect x="70" y="70" width="340" height="38" rx="0" fill="url(#g)"/>
+      <rect x="70" y="70" width="340" height="230" rx="18" fill="#fff" stroke="#e6e3f7"/>
+      <rect x="70" y="70" width="340" height="38" rx="18" fill="url(#g)"/>
       <circle cx="96" cy="89" r="5" fill="#fff"/><circle cx="114" cy="89" r="5" fill="#fff" opacity=".7"/><circle cx="132" cy="89" r="5" fill="#fff" opacity=".5"/>
-      <g fill="url(#g)"><rect x="105" y="220" width="30" height="55" rx="0"/><rect x="150" y="190" width="30" height="85" rx="0"/><rect x="195" y="160" width="30" height="115" rx="0"/><rect x="240" y="135" width="30" height="140" rx="0"/></g>
+      <g fill="url(#g)"><rect x="105" y="220" width="30" height="55" rx="5"/><rect x="150" y="190" width="30" height="85" rx="5"/><rect x="195" y="160" width="30" height="115" rx="5"/><rect x="240" y="135" width="30" height="140" rx="5"/></g>
       <polyline points="110,200 165,170 210,145 255,115 300,125" fill="none" stroke="#ff7a45" stroke-width="4" stroke-linecap="round"/>
-      <rect x="295" y="135" width="95" height="18" rx="0" fill="#ebe8df"/><rect x="295" y="165" width="70" height="18" rx="0" fill="#f5c518"/><rect x="295" y="195" width="85" height="18" rx="0" fill="#ebe8df"/>
-      <g transform="translate(330 270)"><circle r="46" fill="#fff" stroke="#111" stroke-width="1.5"/><circle r="30" fill="none" stroke="url(#g)" stroke-width="8" stroke-dasharray="140 200" transform="rotate(-90)"/><text y="6" text-anchor="middle" font-size="16" font-weight="700" fill="#111">+74%</text></g>
-      <g transform="translate(40 300)"><rect width="150" height="56" rx="0" fill="#fff" stroke="#111" stroke-width="1.5"/><circle cx="28" cy="28" r="14" fill="#f5c518"/><text x="50" y="25" font-size="12" fill="#6b6658">AI citations</text><text x="50" y="43" font-size="15" font-weight="700" fill="#111">1,284</text></g>
+      <rect x="295" y="135" width="95" height="18" rx="9" fill="#f1edff"/><rect x="295" y="165" width="70" height="18" rx="9" fill="#e5f7fd"/><rect x="295" y="195" width="85" height="18" rx="9" fill="#f1edff"/>
+      <g transform="translate(330 270)"><circle r="46" fill="#fff" stroke="#e6e3f7"/><circle r="30" fill="none" stroke="url(#g)" stroke-width="8" stroke-dasharray="140 200" transform="rotate(-90)"/><text y="6" text-anchor="middle" font-size="16" font-weight="700" fill="#1d1946">+74%</text></g>
+      <g transform="translate(40 300)"><rect width="150" height="56" rx="12" fill="#fff" stroke="#e6e3f7"/><circle cx="28" cy="28" r="14" fill="#22b8f0" opacity=".2"/><text x="50" y="25" font-size="12" fill="#6b6894">AI citations</text><text x="50" y="43" font-size="15" font-weight="700" fill="#1d1946">1,284</text></g>
     </svg>
   </div>
 </header>
+
+<section class="trusted">
+  <div class="wrap"><small>Built for</small><span>Agencies</span><span>E-commerce</span><span>SaaS</span><span>Local business</span><span>Publishers</span><span>Freelancers</span></div>
+</section>
 
 <section class="section" id="services">
   <div class="wrap">
@@ -60,6 +64,27 @@
       <div><b>02</b><h3>Pick an agent</h3><p>Use a built-in agent or write your own role and rules.</p></div>
       <div><b>03</b><h3>Review proposals</h3><p>Agents explain every change they suggest.</p></div>
       <div><b>04</b><h3>Approve & log</h3><p>Nothing goes live without you. Every run is logged.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap feature">
+    <div>
+      <span class="eyebrow">One dashboard</span>
+      <h2 style="font-size:clamp(26px,3.5vw,38px);margin:14px 0 8px">See every channel move, then fix what matters</h2>
+      <p class="lead">Audit scores, AI-citation rates, keyword positions and agent runs in one place — with an approval queue so nothing changes without you.</p>
+      <ul>
+        <li>SEO and AI-search (GEO) audits with a clear fix list</li>
+        <li>Track how often ChatGPT, Claude, Gemini and Perplexity name you</li>
+        <li>Keyword opportunities from your own Search Console data</li>
+        <li>Scheduled runs with Slack, Discord and email alerts</li>
+      </ul>
+      <a href="dashboard.html" class="btn">Open the dashboard</a>
+    </div>
+    <div class="mock" aria-hidden="true">
+      <div class="mrow"><div>SEO score<b>86</b></div><div>AI visibility<b>72</b></div><div>Citation rate<b>41%</b></div></div>
+      <div class="mbars"><i style="height:40%"></i><i style="height:55%"></i><i style="height:48%"></i><i style="height:70%"></i><i style="height:62%"></i><i style="height:80%"></i><i style="height:74%"></i><i style="height:92%"></i></div>
     </div>
   </div>
 </section>
@@ -83,6 +108,29 @@
       <div class="plan"><h3>Starter</h3><p class="price">$0<small>/mo</small></p><ul><li>Full guide & checklists</li><li>4 built-in agents</li><li>Run history</li></ul><a href="dashboard.html" class="btn outline">Get started</a></div>
       <div class="plan hot"><span class="ribbon">Popular</span><h3>Growth</h3><p class="price">$49<small>/mo</small></p><ul><li>Everything in Starter</li><li>Custom AI agents</li><li>Approval queue</li><li>Unlimited runs</li></ul><a href="dashboard.html" class="btn">Start free trial</a></div>
       <div class="plan"><h3>Agency</h3><p class="price">$149<small>/mo</small></p><ul><li>Everything in Growth</li><li>Multiple clients</li><li>Team members</li><li>Priority support</li></ul><a href="dashboard.html" class="btn outline">Contact us</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Use cases</span><h2>What teams use it for</h2></div>
+    <div class="quotes">
+      <div class="quote"><p><b>Agencies</b> run weekly audits for every client on a schedule and send the approved fixes as ready-to-paste HTML.</p><div class="who"><span class="av">A</span><div>Client reporting<small>Schedules · Rewriter</small></div></div></div>
+      <div class="quote"><p><b>E-commerce teams</b> find page-2 keywords and pages losing clicks, then fix titles and FAQs before the next sale.</p><div class="who"><span class="av">E</span><div>Organic growth<small>Keywords · Blitz</small></div></div></div>
+      <div class="quote"><p><b>SaaS marketers</b> track whether AI assistants recommend them or a competitor, and which pages to rewrite to get cited.</p><div class="who"><span class="av">S</span><div>AI search (GEO)<small>AI Citations · AI visibility</small></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="faq">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">FAQ</span><h2>Questions, answered</h2></div>
+    <div class="faq">
+      <details><summary>Is it really free and open source?</summary><p>Yes — MIT licensed. Self-host it with Docker or one click on Render. You only pay for any AI API keys you choose to add.</p></details>
+      <details><summary>Do I need API keys to start?</summary><p>No. SEO audits, AI visibility checks, Blitz and the built-in agents work without any keys. Keys unlock AI citation tracking, AI rewrites and the assistant.</p></details>
+      <details><summary>Will the agents change my site or ads on their own?</summary><p>No. Agents only propose changes. Everything waits in an approval queue, and every run is logged.</p></details>
+      <details><summary>Which data sources can I connect?</summary><p>Google Search Console and GA4 today (read-only OAuth). Google Ads and Meta Ads are on the roadmap; until then, CSV exports work with every agent.</p></details>
     </div>
   </div>
 </section>

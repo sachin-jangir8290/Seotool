@@ -30,6 +30,7 @@ app.use((req, res, next) => {
 app.get("/healthz", (_req, res) => res.json({ ok: true }));
 app.use(express.json({ limit: "5mb" }));
 app.use(express.static(path.join(__dirname, "..", "public")));
+app.get("/vendor/chart.js", (_req, res) => res.sendFile(path.join(__dirname, "..", "node_modules", "chart.js", "dist", "chart.umd.min.js")));
 
 // Simple in-memory limiter for auth endpoints: 10 attempts per IP per 15 minutes.
 const attempts = new Map();
@@ -202,6 +203,28 @@ app.get("/api/overview", auth, (req, res) => {
     pending: one("SELECT COUNT(*) n FROM runs r JOIN agents a ON a.id = r.agent_id WHERE a.user_id = ? AND r.approved = 0").n,
     lastSeo: one("SELECT score, url FROM audits WHERE user_id = ? AND type = 'seo' ORDER BY id DESC LIMIT 1") || null,
     lastGeo: one("SELECT score, url FROM audits WHERE user_id = ? AND type = 'geo' ORDER BY id DESC LIMIT 1") || null,
+  });
+});
+
+// ---- chart data for the overview dashboard ----
+app.get("/api/overview/charts", auth, (req, res) => {
+  const u = req.user.id;
+  const days = (n) => Array.from({ length: n }, (_, i) => new Date(Date.now() - (n - 1 - i) * 864e5).toISOString().slice(0, 10));
+  const last14 = days(14);
+  const runsByDay = Object.fromEntries(db.prepare(`SELECT substr(r.created_at, 1, 10) d, COUNT(*) n FROM runs r JOIN agents a ON a.id = r.agent_id
+    WHERE a.user_id = ? AND r.created_at >= ? GROUP BY d`).all(u, last14[0]).map((r) => [r.d, r.n]));
+  const auditsByDay = db.prepare(`SELECT substr(created_at, 1, 10) d, type, ROUND(AVG(score)) s FROM audits WHERE user_id = ? AND created_at >= ? GROUP BY d, type`).all(u, days(30)[0]);
+  const scoreSeries = (type) => { const m = Object.fromEntries(auditsByDay.filter((a) => a.type === type).map((a) => [a.d, a.s])); return days(30).map((d) => m[d] ?? null); };
+  const approvals = db.prepare(`SELECT r.approved a, COUNT(*) n FROM runs r JOIN agents a2 ON a2.id = r.agent_id WHERE a2.user_id = ? GROUP BY r.approved`).all(u);
+  const cite = db.prepare("SELECT summary FROM citation_runs WHERE user_id = ? ORDER BY id DESC LIMIT 1").get(u);
+  const ranks = db.prepare(`SELECT position FROM rank_snapshots s WHERE user_id = ? AND date = (SELECT MAX(date) FROM rank_snapshots WHERE user_id = s.user_id AND site = s.site)`).all(u);
+  const bucket = (lo, hi) => ranks.filter((r) => r.position != null && r.position >= lo && r.position < hi).length;
+  res.json({
+    runs: { labels: last14, values: last14.map((d) => runsByDay[d] || 0) },
+    scores: { labels: days(30), seo: scoreSeries("seo"), geo: scoreSeries("geo") },
+    approvals: { approved: approvals.find((a) => a.a === 1)?.n || 0, rejected: approvals.find((a) => a.a === -1)?.n || 0, pending: approvals.find((a) => a.a === 0)?.n || 0 },
+    citations: cite ? JSON.parse(cite.summary).map((e) => ({ engine: e.engine, rate: e.rate })) : [],
+    ranks: { "Top 3": bucket(0, 3.5), "4–10": bucket(3.5, 10.5), "11–20": bucket(10.5, 20.5), "21+": bucket(20.5, 1e9), "Not ranking": ranks.filter((r) => r.position == null).length },
   });
 });
 
