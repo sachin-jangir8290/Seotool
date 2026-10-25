@@ -3,7 +3,7 @@
   --ink: #1d1946; --muted: #6b6894; --line: #ebe8f7; --soft: #f7f5ff; --bg: #ffffff;
   --orange: #ff7a45; --dark: #1d1946; --accent: var(--p1);
   --radius: 14px; --shadow: 0 10px 30px rgba(54, 32, 140, .08);
-  font-family: Poppins, "Noto Sans Devanagari", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-family: Poppins, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -298,5 +298,3 @@ label.chk input { accent-color: var(--p1); margin-top: 4px; }
 .kw-type.s { background: #fff4d6; color: #8a6100; } .kw-type.c { background: #fdeaea; color: #b42323; } .kw-type.t { background: #e7f0ff; color: #2753c4; }
 .chg.up { color: #16a36a; font-weight: 600; } .chg.down { color: #d93a3a; font-weight: 600; }
 svg.pos { vertical-align: middle; }
-
-.lang-btn { padding: 8px 14px; font-weight: 700; }

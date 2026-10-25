@@ -22,7 +22,6 @@ Run **Google Ads, Meta Ads, SEO and AI search (GEO)** with a team of AI agents �
 - **Agents** — built-in CSV agents (click-loss, search-term miner, creative fatigue, budget pacing) + plugins + custom Claude agents
 - **Approval queue** — agents propose, you approve or reject; every run is logged and exportable as CSV
 - **Assistant** — chat about your runs and audits (needs `ANTHROPIC_API_KEY`)
-- **Hindi UI** — one-click EN / हिं switch on every page, remembered per browser
 - **Agentic marketing guide** — 17 interactive sheets with checklists saved to your account
 
 | Blitz: SEO + GEO | Blitz: ad teardown |
@@ -89,8 +88,7 @@ Add a new agent by dropping one file into `plugins/` — see [CONTRIBUTING.md](C
 - [x] One-click AI rewrites for Blitz "Change" verdicts
 - [x] Keyword opportunities and rank tracking (Search Console)
 - [ ] Multi-client agency mode and white-label reports
-- [x] Hindi UI (EN / हिं switch)
-- [ ] More UI languages
+- [ ] UI translations (Hindi first)
 
 ## License
 
