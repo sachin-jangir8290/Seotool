@@ -29,7 +29,17 @@ The built-in scheduler runs inside the server, so the server must stay on 24/7 (
 3. **Variables**: `DB_PATH=/data/seotool.db`, `NODE_ENV=production`, `SECRET_KEY=<long random string>`, `PUBLIC_URL=https://<your-app>.up.railway.app`, plus any optional keys.
 4. **Settings → Networking → Generate domain.**
 
-## 3. VPS with Docker
+## 3. VPS (one command)
+
+On a fresh Ubuntu/Debian VPS, as root, after pointing an `A` record for your domain at the server:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/sachin-jangir8290/Seotool/main/scripts/vps-setup.sh)
+```
+
+It asks for your domain (and an optional Anthropic key), then installs Docker, starts Citeloop and sets up HTTPS with Caddy. Re-running it updates the app and keeps your `.env`.
+
+## 3b. VPS with Docker (manual)
 
 ```bash
 git clone https://github.com/<you>/Seotool.git && cd Seotool
