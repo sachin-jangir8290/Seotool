@@ -37,7 +37,7 @@
   <div id="app" hidden>
     <nav class="tabs" id="tabs">
       <button data-tab="overview" class="on">Overview</button><button data-tab="agents">Agents</button>
-      <button data-tab="seo">SEO audit</button><button data-tab="geo">AI visibility</button><button data-tab="blitz">⚡ Blitz</button><button data-tab="chat">Assistant</button>
+      <button data-tab="seo">SEO audit</button><button data-tab="geo">AI visibility</button><button data-tab="blitz">⚡ Blitz</button><button data-tab="cite">AI Citations</button><button data-tab="chat">Assistant</button>
     </nav>
 
     <div class="tab" data-pane="overview">
@@ -80,6 +80,24 @@
       </section>
       <div class="live" id="blitz-stats" hidden></div>
       <div id="blitz-out" class="blitz-grid"></div>
+    </div>
+
+    <div class="tab" data-pane="cite" hidden>
+      <section class="sheet">
+        <h2>AI citation tracking</h2>
+        <p class="intro">Asks ChatGPT, Claude, Gemini and Perplexity the questions real buyers ask, then checks every answer: are you named, at what position, how positively, is your site cited — and who gets named instead.</p>
+        <div class="engines" id="cite-engines"></div>
+        <form class="tool" id="cite-form">
+          <div class="two"><input name="brand" placeholder="Brand name (e.g. Glowberry)" required><input name="domain" placeholder="Your domain (glowberry.com)"></div>
+          <input name="aliases" placeholder="Other names for your brand, comma separated (optional)">
+          <textarea name="competitors" rows="3" placeholder="Competitors, one per line: Name | domain.com"></textarea>
+          <textarea name="questions" rows="5" placeholder="Buyer questions, one per line: Best plant-based hair dye for gray hair" required></textarea>
+          <div><button class="btn">Run tracking</button></div>
+        </form>
+      </section>
+      <div class="live" id="cite-stats" hidden></div>
+      <div class="engine-grid" id="cite-out"></div>
+      <section class="sheet"><h2>Past runs</h2><div id="cite-history"></div></section>
     </div>
 
     <div class="tab" data-pane="chat" hidden>
@@ -127,5 +145,6 @@
 </main>
 <script src="dashboard.js"></script>
 <script src="blitz.js"></script>
+<script src="citations.js"></script>
 </body>
 </html>

@@ -26,6 +26,10 @@ db.exec(`
     id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     type TEXT NOT NULL, url TEXT NOT NULL, score INTEGER, result TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP);
+  CREATE TABLE IF NOT EXISTS citation_runs (
+    id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    brand TEXT NOT NULL, config TEXT NOT NULL, summary TEXT, rows TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP);
 `);
 
 module.exports = db;

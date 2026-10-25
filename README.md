@@ -12,6 +12,7 @@ Run **Google Ads, Meta Ads, SEO and AI search (GEO)** with a team of AI agents �
   - buyer questions matched to your pages (*Answered / Weak / No page*)
   - competitor pages worth copying (*Steal / Skip*)
   - ad teardown: hook, format, offer, awareness, driver, CTA, claim risk → patterns that survive → briefs
+- **AI citation tracking** — asks Claude, ChatGPT, Gemini and Perplexity your buyer questions; shows citation rate, position, sentiment, whether your site is cited, and who gets named instead (each engine runs only when its API key is set)
 - **SEO audit** — 14 on-page checks with a 0–100 score
 - **AI visibility (GEO)** — AI crawler access (GPTBot, ClaudeBot, PerplexityBot…), llms.txt, schema, answer-friendly content
 - **Agents** — built-in CSV agents (click-loss, search-term miner, creative fatigue, budget pacing) + plugins + custom Claude agents
@@ -45,7 +46,10 @@ Copy `.env.example` to `.env` (or export the variables) to configure:
 |---|---|
 | `PORT` | Server port (default 3000) |
 | `DB_PATH` | SQLite file (default `./seotool.db`) |
-| `ANTHROPIC_API_KEY` | Enables custom AI agents and the Assistant |
+| `ANTHROPIC_API_KEY` | Custom AI agents, Assistant, Claude citation tracking |
+| `OPENAI_API_KEY` / `OPENAI_MODEL` | ChatGPT citation tracking (default model `gpt-4o-mini`) |
+| `GEMINI_API_KEY` / `GEMINI_MODEL` | Gemini citation tracking (default `gemini-2.5-flash`) |
+| `PERPLEXITY_API_KEY` / `PERPLEXITY_MODEL` | Perplexity citation tracking (default `sonar`) |
 | `NODE_ENV=production` | Secure cookies (serve over HTTPS) |
 | `PLUGINS_DIR` | Extra plugin folder (default `./plugins`) |
 | `AUDIT_ALLOW_PRIVATE=1` | Let audits reach localhost/private IPs (development only) |
@@ -56,7 +60,7 @@ Add a new agent by dropping one file into `plugins/` — see [CONTRIBUTING.md](C
 
 ## Roadmap
 
-- [ ] Real AI citation tracking (ask ChatGPT, Claude, Gemini, Perplexity)
+- [x] Real AI citation tracking (ask ChatGPT, Claude, Gemini, Perplexity)
 - [ ] Live connections: Search Console, Google Ads, Meta Ads, GA4
 - [ ] Scheduled runs with email / Slack alerts
 - [ ] One-click AI rewrites for Blitz "Change" verdicts

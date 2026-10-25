@@ -6,6 +6,8 @@ const { ANALYZERS, parseCSV } = require("./analyzers");
 const ai = require("./ai");
 const audit = require("./audit");
 const blitz = require("./blitz");
+const engines = require("./engines");
+const citations = require("./citations");
 
 const app = express();
 app.use(express.json({ limit: "5mb" }));
@@ -239,6 +241,49 @@ app.post("/api/blitz/ads", auth, wrap((req, res) => {
   const cat = blitz.categorize(rows);
   const ms = Number(process.hrtime.bigint() - t0) / 1e6;
   res.json({ rows, category: cat, briefs: blitz.briefs(cat), stats: { ads: rows.length, judgments: rows.length * 9, brands: new Set(rows.map((r) => r.brand)).size, ms } });
+}));
+
+// ---- AI citation tracking: ask real AI engines the buyer questions ----
+app.get("/api/citations/engines", auth, (_req, res) => res.json(engines.available()));
+
+const list = (v) => String(v || "").split(/[\n,]/).map((s) => s.trim()).filter(Boolean);
+app.post("/api/citations/run", auth, async (req, res) => {
+  res.type("application/x-ndjson");
+  const send = (o) => res.write(JSON.stringify(o) + "\n");
+  try {
+    const b = req.body || {};
+    const brand = { name: String(b.brand || "").trim(), domain: String(b.domain || "").trim().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/.*$/, ""), aliases: list(b.aliases) };
+    if (!brand.name) throw new Error("Brand name required");
+    const competitors = list(b.competitors).slice(0, 10).map((c) => {
+      const [name, domain] = c.split(/\s*[|:]\s*/);
+      return { name, domain: (domain || "").replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/.*$/, "") };
+    });
+    const questions = String(b.questions || "").split(/\r?\n/).map((q) => q.trim()).filter(Boolean).slice(0, 50);
+    if (!questions.length) throw new Error("Add at least one buyer question");
+    const enabled = engines.available().filter((e) => e.enabled).map((e) => e.id);
+    const chosen = [].concat(b.engines || enabled).filter((e) => enabled.includes(e));
+    if (!chosen.length) throw new Error("No AI engine configured. Set ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY or PERPLEXITY_API_KEY on the server.");
+    const t0 = Date.now();
+    send({ type: "start", total: chosen.length * questions.length, engines: chosen });
+    const out = await citations.track({ brand, competitors, questions, engines: chosen }, (row) => send({ type: "row", row, elapsed: (Date.now() - t0) / 1000 }));
+    const { lastInsertRowid } = db.prepare("INSERT INTO citation_runs (user_id, brand, config, summary, rows) VALUES (?, ?, ?, ?, ?)")
+      .run(req.user.id, brand.name, JSON.stringify({ brand, competitors, questions, engines: chosen }), JSON.stringify(out.summary), JSON.stringify(out.rows));
+    send({ type: "done", id: Number(lastInsertRowid), summary: out.summary, elapsed: (Date.now() - t0) / 1000 });
+  } catch (e) {
+    send({ type: "error", message: e.message });
+  }
+  res.end();
+});
+
+app.get("/api/citations/runs", auth, (req, res) => {
+  const rows = db.prepare("SELECT id, brand, summary, created_at FROM citation_runs WHERE user_id = ? ORDER BY id DESC LIMIT 30").all(req.user.id);
+  res.json(rows.map((r) => ({ ...r, summary: JSON.parse(r.summary || "[]") })));
+});
+
+app.get("/api/citations/runs/:id", auth, wrap((req, res) => {
+  const r = db.prepare("SELECT * FROM citation_runs WHERE id = ? AND user_id = ?").get(req.params.id, req.user.id);
+  if (!r) throw new Error("Run not found");
+  res.json({ ...r, config: JSON.parse(r.config), summary: JSON.parse(r.summary || "[]"), rows: JSON.parse(r.rows || "[]") });
 }));
 
 const PORT = process.env.PORT || 3000;

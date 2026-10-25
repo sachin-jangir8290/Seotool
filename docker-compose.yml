@@ -6,6 +6,9 @@ services:
     environment:
       # Optional: enables Custom AI agents and the Assistant
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - PERPLEXITY_API_KEY=${PERPLEXITY_API_KEY:-}
       # Set to "production" only when serving over HTTPS (secure cookies)
       - NODE_ENV=${NODE_ENV:-development}
     volumes:

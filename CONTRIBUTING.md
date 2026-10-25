@@ -47,6 +47,7 @@ Please add a test in `test/` for your agent.
 | `server/analyzers.js` | Built-in CSV agents + plugin loader |
 | `server/blitz.js` | Blitz rules engine (SEO/GEO judgments, ad teardown) |
 | `server/audit.js` | SEO audit and AI-visibility check |
+| `server/engines.js`, `server/citations.js` | AI citation tracking (Claude, ChatGPT, Gemini, Perplexity) |
 | `server/ai.js` | Claude-powered agents and assistant (optional) |
 | `plugins/` | Community agents |
 
